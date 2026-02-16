@@ -9,7 +9,7 @@ ModelRenderer::ModelRenderer() {
 ModelRenderer::~ModelRenderer() {
 }
 
-void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
+void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera *camera,
                                 const Model &model, const Texture2D &texture,
                                 const Shader &shader) {
 
@@ -17,15 +17,14 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
 
   // Set your model/view/projection uniforms here
   shader.SetMatrix4("model", modelMat);
-  shader.SetMatrix4("view", camera.GetViewMatrix());
-  shader.SetMatrix4("projection", camera.GetProjectionMatrix());
+  shader.SetMatrix4("view", camera->GetViewMatrix());
+  shader.SetMatrix4("projection", camera->GetProjectionMatrix());
 
   // Bind texture
   texture.Bind();
 
   // Draw
   glBindVertexArray(model.VAO);
-  glDrawArrays(GL_TRIANGLES, 0,
-               model.vertices.size() / 8); // divide by 8 floats per vertex
+  glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
 }

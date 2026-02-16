@@ -20,7 +20,7 @@ void RenderSystem::renderWorld(World &world, float alpha) {
     const Texture2D &texture = ResourceManager::GetTexture(sprite.textureID);
     const Model &model = ResourceManager::GetModel(sprite.modelID);
     const Shader &shader = ResourceManager::GetShader(sprite.shaderID);
-    Camera &camera = world.camera;
+    Camera *camera = world.camera;
 
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,

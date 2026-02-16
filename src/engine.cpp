@@ -33,13 +33,16 @@ void Engine::Init() {
 
   this->renderer = new RenderSystem();
   this->objectFactory = new ObjectFactory(this->world);
+  this->world.Init();
 
   // load textures
   std::cout << "Loading Textures" << std::endl;
+  ResourceManager::LoadTexture("../textures/plain.png", false, "solid");
 
   // load models
   std::cout << "Loading Models" << std::endl;
   ResourceManager::LoadModel("../models/quad_sphere.obj", "sphere");
+  ResourceManager::LoadModel("../models/cube.obj", "cube");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
@@ -55,7 +58,7 @@ void Engine::ProcessInput() {
   float yoffset =
       this->lastMouseY -
       this->mouseY; // reversed since y-coordinates go from bottom to top
-  this->world.camera.ProcessMouseMovement(xoffset, yoffset);
+  this->world.camera->ProcessMouseMovement(xoffset, yoffset);
 }
 
 void Engine::Render(float alpha) {

@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
+  glEnable(GL_DEPTH_TEST);
+
   glfwSetKeyCallback(window, key_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
     // ------
     float alpha = accumulatedTime / timeStep;
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     engineObj.Render(alpha);
 
     glfwSwapBuffers(window);

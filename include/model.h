@@ -10,9 +10,10 @@
 // Parser and initializer for WavefrontOBJ files to be used as 3D models.
 class Model {
 public:
-  GLuint VAO, VBO;
+  GLuint VAO, VBO, EBO;
   // Holds x y z nx ny nz u v for each vertex
-  std::vector<std::array<float, 8>> vertices;
+  std::vector<float> vertices;
+  std::vector<unsigned int> indices;
 
   Model();
 

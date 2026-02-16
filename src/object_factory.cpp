@@ -9,16 +9,14 @@ Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, Vec3 color,
   Object &obj = this->world->CreateObject();
 
   Sprite sprite = Sprite();
-  sprite.modelID = "sphere";
-  sprite.textureID = "planet";
+  sprite.modelID = "cube";
+  sprite.textureID = "solid";
   sprite.shaderID = "diffuse";
-  SpriteID spriteID = this->world->AddSprite(sprite);
+  obj.spriteID = this->world->AddSprite(sprite);
 
   Body body = Body();
-
   body.mass = mass;
   body.velocity = initialSpeed;
-
   obj.bodyID = this->world->AddBody(body);
 
   obj.transform.position = position;

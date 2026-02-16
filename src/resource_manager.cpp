@@ -60,6 +60,15 @@ void ResourceManager::Clear() {
     glDeleteTextures(1, &iter.second.ID);
 
   std::cout << "Deleted successfully" << std::endl;
+
+  std::cout << "Attempting to delete models" << std::endl;
+  // (properly) delete all models
+  for (auto iter : Models) {
+    glDeleteVertexArrays(1, &iter.second.VAO);
+    glDeleteBuffers(1, &iter.second.VBO);
+    glDeleteBuffers(1, &iter.second.EBO);
+  }
+  std::cout << "Deleted successfully" << std::endl;
 }
 
 Shader ResourceManager::loadShaderFromFile(const char *vShaderFile,

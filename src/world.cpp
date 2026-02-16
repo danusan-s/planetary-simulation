@@ -2,7 +2,6 @@
 #include "types.h"
 
 World::World() {
-  camera = Camera();
 }
 
 Object &World::CreateObject() {
@@ -18,4 +17,8 @@ SpriteID World::AddSprite(const Sprite &sprite) {
 BodyID World::AddBody(const Body &body) {
   bodies.push_back(body);
   return static_cast<BodyID>(bodies.size() - 1);
+}
+
+void World::Init() {
+  this->camera = new Camera();
 }
