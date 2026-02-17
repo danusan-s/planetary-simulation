@@ -29,12 +29,12 @@ enum Click {
 // easy access to each of the components and manageability.
 class Engine {
 private:
-  World world;
   PhysicsSystem physics;
 
   // Init render related stuff later as it needs OpenGL context
   RenderSystem *renderer;
   ObjectFactory *objectFactory;
+  World *world;
 
 public:
   // game state

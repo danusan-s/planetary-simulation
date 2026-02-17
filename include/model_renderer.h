@@ -12,7 +12,7 @@ public:
   ModelRenderer();
   ~ModelRenderer();
 
-  void renderModel(const glm::mat4 &modelMat, Camera *camera,
+  void renderModel(const glm::mat4 &modelMat, Camera &camera,
                    const Model &model, const Texture2D &texture,
                    const Shader &shader);
 };

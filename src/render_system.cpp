@@ -5,28 +5,64 @@
 
 RenderSystem::RenderSystem() {
   this->renderer = new ModelRenderer();
+  setupDebugData();
 }
 
 RenderSystem::~RenderSystem() {
   delete this->renderer;
 }
 
-void RenderSystem::renderWorld(World &world, float alpha) {
-  for (const auto &obj : world.objects) {
-    if (obj.spriteID == INVALID_ID || obj.spriteID >= world.sprites.size())
+void RenderSystem::setupDebugData() {
+  // Debug render
+  float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  0.5f, -0.5f, -0.5f,
+                      1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,  0.5f,
+                      0.5f,  -0.5f, 1.0f,  1.0f,  -0.5f, 0.5f, -0.5f, 0.0f,
+                      1.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  0.0f};
+
+  GLuint VBO;
+
+  glGenVertexArrays(1, &debugVAO);
+  glGenBuffers(1, &VBO);
+
+  glBindVertexArray(debugVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  // Position (location = 0)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  // UV (location = 1)
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindVertexArray(0);
+}
+
+void RenderSystem::renderWorld(World *world, float alpha) {
+  for (const auto &obj : world->objects) {
+    if (obj.spriteID == INVALID_ID || obj.spriteID >= world->sprites.size())
       continue;
 
-    const Sprite &sprite = world.sprites[obj.spriteID];
+    const Sprite &sprite = world->sprites[obj.spriteID];
     const Texture2D &texture = ResourceManager::GetTexture(sprite.textureID);
     const Model &model = ResourceManager::GetModel(sprite.modelID);
     const Shader &shader = ResourceManager::GetShader(sprite.shaderID);
-    Camera *camera = world.camera;
 
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,
                               static_cast<glm::vec3>(obj.transform.position));
     modelMat = glm::scale(modelMat, glm::vec3(obj.transform.radius));
 
-    this->renderer->renderModel(modelMat, camera, model, texture, shader);
+    this->renderer->renderModel(modelMat, world->camera, model, texture,
+                                shader);
   }
+
+  // Debug render
+  ResourceManager::GetShader("debug").Use();
+  glBindVertexArray(debugVAO);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+  glBindVertexArray(0);
 }

@@ -8,7 +8,7 @@ private:
   World *world;
 
 public:
-  ObjectFactory(World &world);
+  ObjectFactory(World *world);
   Object &spawnPlanet(Vec3 position, float radius, Vec3 color, float mass,
                       Vec3 initialSpeed);
 };

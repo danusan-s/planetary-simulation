@@ -8,12 +8,11 @@
 class World {
 public:
   World();
-  Camera *camera;
+  Camera camera;
   std::vector<Object> objects;
   std::vector<Sprite> sprites;
   std::vector<Body> bodies;
 
-  void Init();
   Object &CreateObject();
   SpriteID AddSprite(const Sprite &sprite);
   BodyID AddBody(const Body &body);

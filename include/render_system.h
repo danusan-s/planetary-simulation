@@ -2,7 +2,6 @@
 #define RENDER_SYSTEM_H
 
 #include "model_renderer.h"
-#include "quad_renderer.h"
 #include "world.h"
 
 class RenderSystem {
@@ -10,11 +9,12 @@ public:
   RenderSystem();
   ~RenderSystem();
 
-  void renderWorld(World &world, float alpha);
+  void renderWorld(World *world, float alpha);
 
 private:
   ModelRenderer *renderer;
-  QuadRenderer *quadRenderer;
+  GLuint debugVAO;
+  void setupDebugData();
 };
 
 #endif // !RENDER_SYSTEM_H

@@ -100,6 +100,9 @@ int main(int argc, char *argv[]) {
     engineObj.Render(alpha);
 
     glfwSwapBuffers(window);
+
+    while (GLenum err = glGetError())
+      std::cout << "GL ERROR: " << err << std::endl;
   }
 
   // delete all resources as loaded using the resource manager

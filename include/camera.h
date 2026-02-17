@@ -15,6 +15,9 @@ const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
+const float ASPECT_RATIO = 16.0f / 9.0f;
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 100.0f;
 
 // An abstract camera class that processes input and calculates the
 // corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -42,8 +45,8 @@ public:
          glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW,
          float pitch = PITCH)
       : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
-        MouseSensitivity(SENSITIVITY), Zoom(ZOOM), aspectRatio(16.0f / 9.0f),
-        nearPlane(0.1f), farPlane(100.0f) {
+        MouseSensitivity(SENSITIVITY), Zoom(ZOOM), aspectRatio(ASPECT_RATIO),
+        nearPlane(NEAR_PLANE), farPlane(FAR_PLANE) {
     Position = position;
     WorldUp = up;
     Yaw = yaw;
@@ -54,7 +57,8 @@ public:
   Camera(float posX, float posY, float posZ, float upX, float upY, float upZ,
          float yaw, float pitch)
       : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(SPEED),
-        MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+        MouseSensitivity(SENSITIVITY), Zoom(ZOOM), aspectRatio(ASPECT_RATIO),
+        nearPlane(NEAR_PLANE), farPlane(FAR_PLANE) {
     Position = glm::vec3(posX, posY, posZ);
     WorldUp = glm::vec3(upX, upY, upZ);
     Yaw = yaw;

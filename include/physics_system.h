@@ -8,7 +8,7 @@ public:
   PhysicsSystem();
   ~PhysicsSystem();
 
-  void step(World &world, float dt);
+  void step(World *world, float dt);
 };
 
 #endif // !PHYSICS_SYSTEM_H

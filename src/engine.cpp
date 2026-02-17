@@ -3,7 +3,6 @@
 #include <iostream>
 
 Engine::Engine() {
-  this->world = World();
   this->physics = PhysicsSystem();
   this->renderer = nullptr;
   this->objectFactory = nullptr;
@@ -30,10 +29,12 @@ void Engine::Init() {
   std::cout << "Loading Shaders" << std::endl;
   ResourceManager::LoadShader("../shaders/diffuse.vert",
                               "../shaders/diffuse.frag", nullptr, "diffuse");
+  ResourceManager::LoadShader("../shaders/debug.vert", "../shaders/debug.frag",
+                              nullptr, "debug");
 
+  this->world = new World();
   this->renderer = new RenderSystem();
   this->objectFactory = new ObjectFactory(this->world);
-  this->world.Init();
 
   // load textures
   std::cout << "Loading Textures" << std::endl;
@@ -58,7 +59,7 @@ void Engine::ProcessInput() {
   float yoffset =
       this->lastMouseY -
       this->mouseY; // reversed since y-coordinates go from bottom to top
-  this->world.camera->ProcessMouseMovement(xoffset, yoffset);
+  this->world->camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 void Engine::Render(float alpha) {

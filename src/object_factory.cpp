@@ -1,7 +1,7 @@
 #include "object_factory.h"
 
-ObjectFactory::ObjectFactory(World &world) {
-  this->world = &world;
+ObjectFactory::ObjectFactory(World *world) {
+  this->world = world;
 }
 
 Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, Vec3 color,
