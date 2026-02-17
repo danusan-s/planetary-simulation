@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   glEnable(GL_SCISSOR_TEST);
   engineObj.viewport =
@@ -170,17 +171,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action,
   }
 }
 
-float firstMouse = true;
-
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   float xpos = static_cast<float>(xposIn);
   float ypos = static_cast<float>(yposIn);
-
-  if (firstMouse) {
-    engineObj.lastMouseX = xpos;
-    engineObj.lastMouseY = ypos;
-    firstMouse = false;
-  }
 
   engineObj.mouseX = xpos;
   engineObj.mouseY = ypos;

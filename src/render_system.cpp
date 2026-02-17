@@ -61,8 +61,8 @@ void RenderSystem::renderWorld(World *world, float alpha) {
   }
 
   // Debug render
-  ResourceManager::GetShader("debug").Use();
-  glBindVertexArray(debugVAO);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
-  glBindVertexArray(0);
+  // ResourceManager::GetShader("debug").Use();
+  // glBindVertexArray(debugVAO);
+  // glDrawArrays(GL_TRIANGLES, 0, 6);
+  // glBindVertexArray(0);
 }

@@ -8,8 +8,10 @@ Engine::Engine() {
   this->objectFactory = nullptr;
   this->clickState = NO_CLICK;
 
-  float mouseX = 0.0f;
-  float mouseY = 0.0f;
+  this->mouseX = 0.0f;
+  this->mouseY = 0.0f;
+  this->lastMouseX = 0.0f;
+  this->lastMouseY = 0.0f;
 }
 
 Engine::~Engine() {
@@ -47,7 +49,7 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  objectFactory->spawnPlanet(Vec3(1.0f), 1.0f, Vec3(1.0f), 1.0f, 0.0f);
+  objectFactory->spawnPlanet(Vec3(0.0f), 1.0f, Vec3(1.0f), 1.0f, 0.0f);
 }
 
 void Engine::Update(float timeStep) {
@@ -60,6 +62,9 @@ void Engine::ProcessInput() {
       this->lastMouseY -
       this->mouseY; // reversed since y-coordinates go from bottom to top
   this->world->camera.ProcessMouseMovement(xoffset, yoffset);
+
+  this->lastMouseX = this->mouseX;
+  this->lastMouseY = this->mouseY;
 }
 
 void Engine::Render(float alpha) {

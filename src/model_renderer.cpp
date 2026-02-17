@@ -21,6 +21,7 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
   shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
   // Bind texture
+  glActiveTexture(GL_TEXTURE0);
   texture.Bind();
 
   // Draw
