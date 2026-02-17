@@ -41,9 +41,9 @@ void PhysicsSystem::step(World *world, float dt) {
     if (obj.bodyID == INVALID_ID || obj.bodyID >= world->bodies.size())
       continue;
 
-    obj.previousTransform = obj.transform;
     Body &body = world->bodies[obj.bodyID];
 
     obj.transform.position += body.velocity * dt;
+    obj.updateTrail(obj.transform.position);
   }
 }

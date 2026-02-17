@@ -78,6 +78,8 @@ void Engine::Init() {
                               "../shaders/diffuse.frag", nullptr, "diffuse");
   ResourceManager::LoadShader("../shaders/debug.vert", "../shaders/debug.frag",
                               nullptr, "debug");
+  ResourceManager::LoadShader("../shaders/trail.vert", "../shaders/trail.frag",
+                              nullptr, "trail");
 
   this->world = new World();
   this->renderer = new RenderSystem();

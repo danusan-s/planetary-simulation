@@ -59,6 +59,22 @@ void RenderSystem::renderWorld(World *world, float alpha) {
 
     this->renderer->renderModel(modelMat, world->camera, model, texture, shader,
                                 color);
+
+    const Shader &trailShader = ResourceManager::GetShader("trail");
+    trailShader.Use();
+    trailShader.SetMatrix4("view", world->camera.GetViewMatrix());
+    trailShader.SetMatrix4("projection", world->camera.GetProjectionMatrix());
+    trailShader.SetVector3f("trailColor", color * 0.5f);
+
+    glBindVertexArray(obj.trailVAO);
+    int start = (obj.trailHead + 1) % MAX_TRAIL;
+
+    if (start == 0) {
+      glDrawArrays(GL_LINE_STRIP, 0, MAX_TRAIL);
+    } else {
+      glDrawArrays(GL_LINE_STRIP, start, MAX_TRAIL - start);
+      glDrawArrays(GL_LINE_STRIP, 0, start);
+    }
   }
 
   // Debug render

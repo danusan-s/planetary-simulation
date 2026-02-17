@@ -1,7 +1,27 @@
 #include "object_factory.h"
+#include "camera.h"
+#include "types.h"
 
 ObjectFactory::ObjectFactory(World *world) {
   this->world = world;
+}
+
+void setupTrailRenderer(Object &obj) {
+  glGenVertexArrays(1, &obj.trailVAO);
+  glGenBuffers(1, &obj.trailVBO);
+
+  glBindVertexArray(obj.trailVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, obj.trailVBO);
+  glBufferData(GL_ARRAY_BUFFER, MAX_TRAIL * sizeof(Vec3), nullptr,
+               GL_DYNAMIC_DRAW);
+
+  // Position (location = 0)
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vec3), (void *)0);
+
+  glEnableVertexAttribArray(0);
+
+  glBindVertexArray(0);
 }
 
 Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
@@ -22,6 +42,11 @@ Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
 
   obj.transform.position = position;
   obj.transform.radius = radius;
+  for (int i = 0; i < MAX_TRAIL; i++) {
+    obj.trail[i] = position;
+  }
+
+  setupTrailRenderer(obj);
 
   return obj;
 }

@@ -1,6 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "camera.h"
 #include <cmath>
 #include <cstdint>
 #include <glm/ext/vector_float3.hpp>
@@ -13,6 +14,7 @@ using SpriteID = uint32_t;
 using BodyID = uint32_t;
 
 constexpr uint32_t INVALID_ID = UINT32_MAX;
+constexpr int MAX_TRAIL = 240;
 
 struct Vec3 {
   float x;
@@ -100,10 +102,25 @@ struct Body {
 };
 
 struct Object {
-  Transform transform = Transform();
-  Transform previousTransform = Transform();
+  Transform transform;
+  Vec3 trail[MAX_TRAIL];
+  int trailHead = 0;
+  GLuint trailVAO, trailVBO = 0;
   SpriteID spriteID = INVALID_ID;
   BodyID bodyID = INVALID_ID;
+
+  // Vec3 getPreviousPos() const {
+  //   int prevIndex = (trailHead + MAX_TRAIL - 1) % MAX_TRAIL;
+  //   return trail[prevIndex];
+  // }
+
+  void updateTrail(const Vec3 &newPosition) {
+    trailHead = (trailHead + 1) % MAX_TRAIL;
+    trail[trailHead] = newPosition;
+    glBindBuffer(GL_ARRAY_BUFFER, trailVBO);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vec3) * trailHead, sizeof(Vec3),
+                    &trail[trailHead]);
+  }
 };
 
 #endif // !TYPES_H

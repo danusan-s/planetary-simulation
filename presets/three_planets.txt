@@ -9,13 +9,13 @@ planet
 pos 5 0 0
 radius 0.1 
 mass 30
-vel 0 0 -6
+vel 0 -6 -6
 color 1 0 0 
 
 planet
-pos 7 0 0
+pos -7 0 0
 radius 0.1 
 mass 10
-vel 0 0 -4
+vel 0 0 4
 color 0 1 0 
 
