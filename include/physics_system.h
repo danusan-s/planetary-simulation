@@ -8,6 +8,8 @@ public:
   PhysicsSystem();
   ~PhysicsSystem();
 
+  int counter = 0;
+
   void step(World *world, float dt);
 };
 

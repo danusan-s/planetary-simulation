@@ -8,8 +8,10 @@ PhysicsSystem::PhysicsSystem() {
 PhysicsSystem::~PhysicsSystem() {
 }
 
+const float G = 0.001f;
+const int sampleCount = 4;
+
 void PhysicsSystem::step(World *world, float dt) {
-  const float G = 0.001f;
 
   for (size_t i = 0; i < world->objects.size(); i++) {
     Object &objA = world->objects[i];
@@ -44,6 +46,8 @@ void PhysicsSystem::step(World *world, float dt) {
     Body &body = world->bodies[obj.bodyID];
 
     obj.transform.position += body.velocity * dt;
-    obj.updateTrail(obj.transform.position);
+    if (counter % sampleCount == 0)
+      obj.updateTrail(obj.transform.position);
   }
+  ++counter;
 }
