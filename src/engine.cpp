@@ -1,4 +1,5 @@
 #include "engine.h"
+#include "camera.h"
 #include "resource_manager.h"
 #include <iostream>
 
@@ -49,14 +50,16 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  objectFactory->spawnPlanet(Vec3(0.0f), 1.0f, Vec3(1.0f), 1.0f, 0.0f);
+  objectFactory->spawnPlanet(Vec3(0.0f), 0.2f, Vec3(1.0f), 1000.0f, Vec3(0.0f));
+  objectFactory->spawnPlanet(Vec3(5.0f, 0.0f, 0.0f), 0.1f, Vec3(1.0f), 10.0f,
+                             Vec3(0.0f, 0.0f, -6.0f));
 }
 
 void Engine::Update(float timeStep) {
   this->physics.step(this->world, timeStep);
 }
 
-void Engine::ProcessInput() {
+void Engine::ProcessInput(float deltaTime) {
   float xoffset = this->mouseX - this->lastMouseX;
   float yoffset =
       this->lastMouseY -
@@ -65,6 +68,15 @@ void Engine::ProcessInput() {
 
   this->lastMouseX = this->mouseX;
   this->lastMouseY = this->mouseY;
+
+  if (keys[GLFW_KEY_W])
+    this->world->camera.ProcessKeyboard(FORWARD, deltaTime);
+  if (keys[GLFW_KEY_S])
+    this->world->camera.ProcessKeyboard(BACKWARD, deltaTime);
+  if (keys[GLFW_KEY_A])
+    this->world->camera.ProcessKeyboard(LEFT, deltaTime);
+  if (keys[GLFW_KEY_D])
+    this->world->camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
 void Engine::Render(float alpha) {

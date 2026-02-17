@@ -1,6 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <cmath>
 #include <cstdint>
 #include <glm/ext/vector_float3.hpp>
 #include <string>
@@ -25,6 +26,17 @@ struct Vec3 {
   }
 
   Vec3(float x, float y, float z) : x(x), y(y), z(z) {
+  }
+
+  float dot(const Vec3 &other) const {
+    return x * other.x + y * other.y + z * other.z;
+  }
+
+  Vec3 normalized() const {
+    float length = sqrt(x * x + y * y + z * z);
+    if (length == 0.0f)
+      return Vec3(0.0f);
+    return Vec3(x / length, y / length, z / length);
   }
 
   Vec3 operator+(const Vec3 &other) const {

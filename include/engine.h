@@ -51,7 +51,7 @@ public:
   // initialize game state (load all shaders/textures/levels)
   void Init();
   // game loop
-  void ProcessInput();
+  void ProcessInput(float deltaTime);
   void Update(float timeStep);
   void Render(float alpha);
 };

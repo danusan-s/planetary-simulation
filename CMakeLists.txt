@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(PhysicsEngine)
+project(PlanetarySystem)
 
 set(CMAKE_CXX_STANDARD 17)
 set(PROJECT_NAME "PlanetarySystem")

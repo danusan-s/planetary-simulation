@@ -47,6 +47,9 @@ int main(int argc, char *argv[]) {
   }
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_SCISSOR_TEST);
+  glEnable(GL_BLEND);
 
   glfwSetKeyCallback(window, key_callback);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -54,10 +57,8 @@ int main(int argc, char *argv[]) {
   glfwSetCursorPosCallback(window, mouse_callback);
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-  glEnable(GL_SCISSOR_TEST);
   engineObj.viewport =
       letterbox_viewport(INIT_SCREEN_WIDTH, INIT_SCREEN_HEIGHT);
-  glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // initialize game
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) {
   float accumulatedTime = 0.0f;
 
   //  60 fps simulation
-  const float timeStep = 1 / 60.0f;
+  const float timeStep = 1 / 240.0f;
 
   while (!glfwWindowShouldClose(window)) {
     // calculate delta time
@@ -84,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     // process input
     // -------------
-    engineObj.ProcessInput();
+    engineObj.ProcessInput(deltaTime);
 
     while (accumulatedTime >= timeStep) {
       // compute physics
