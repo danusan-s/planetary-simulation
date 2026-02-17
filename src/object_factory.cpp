@@ -4,14 +4,15 @@ ObjectFactory::ObjectFactory(World *world) {
   this->world = world;
 }
 
-Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, Vec3 color,
-                                   float mass, Vec3 initialSpeed) {
+Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
+                                   Vec3 initialSpeed, Vec3 color) {
   Object &obj = this->world->CreateObject();
 
   Sprite sprite = Sprite();
   sprite.modelID = "sphere";
   sprite.textureID = "solid";
   sprite.shaderID = "diffuse";
+  sprite.color = color;
   obj.spriteID = this->world->AddSprite(sprite);
 
   Body body = Body();

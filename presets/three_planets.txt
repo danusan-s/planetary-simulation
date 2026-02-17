@@ -1,0 +1,21 @@
+planet
+pos 0 0 0
+radius 0.2
+mass 1000
+vel 0 0 0
+color 1 1 1 
+
+planet
+pos 5 0 0
+radius 0.1 
+mass 30
+vel 0 0 -6
+color 1 0 0 
+
+planet
+pos 7 0 0
+radius 0.1 
+mass 10
+vel 0 0 -4
+color 0 1 0 
+

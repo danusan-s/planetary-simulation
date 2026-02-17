@@ -14,7 +14,7 @@ public:
 
   void renderModel(const glm::mat4 &modelMat, Camera &camera,
                    const Model &model, const Texture2D &texture,
-                   const Shader &shader);
+                   const Shader &shader, const glm::vec3 &color);
 };
 
 #endif // !MODEL_RENDERER_H

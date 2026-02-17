@@ -9,8 +9,8 @@ private:
 
 public:
   ObjectFactory(World *world);
-  Object &spawnPlanet(Vec3 position, float radius, Vec3 color, float mass,
-                      Vec3 initialSpeed);
+  Object &spawnPlanet(Vec3 position, float radius, float mass,
+                      Vec3 initialSpeed, Vec3 color);
 };
 
 #endif // !OBJECT_FACTORY_H

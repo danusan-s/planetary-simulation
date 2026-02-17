@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "camera.h"
 #include "resource_manager.h"
+#include <fstream>
 #include <iostream>
 
 Engine::Engine() {
@@ -22,6 +23,49 @@ Engine::~Engine() {
   delete this->objectFactory;
 
   std::cout << "Game Object successfully deleted" << std::endl;
+}
+
+void parsePreset(ObjectFactory *factory, const char *filePath) {
+  std::ifstream presetFile(filePath);
+  if (!presetFile.is_open()) {
+    std::cerr << "Failed to open preset file: " << filePath << std::endl;
+    return;
+  }
+
+  std::cout << "Parsing preset file: " << filePath << std::endl;
+
+  std::string line;
+  while (std::getline(presetFile, line)) {
+    std::cout << "Read line: " << line << std::endl;
+    if (line == "planet") {
+      std::cout << "Parsing planet definition" << std::endl;
+      float posX, posY, posZ, radius, mass, velX, velY, velZ, colorR, colorG,
+          colorB;
+      while (std::getline(presetFile, line)) {
+        if (line.empty())
+          break; // End of planet definition
+
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
+
+        if (prefix == "pos") {
+          iss >> posX >> posY >> posZ;
+        } else if (prefix == "radius") {
+          iss >> radius;
+        } else if (prefix == "mass") {
+          iss >> mass;
+        } else if (prefix == "vel") {
+          iss >> velX >> velY >> velZ;
+        } else if (prefix == "color") {
+          iss >> colorR >> colorG >> colorB;
+        }
+      }
+      factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
+                           Vec3(velX, velY, velZ),
+                           Vec3(colorR, colorG, colorB));
+    }
+  }
 }
 
 void Engine::Init() {
@@ -50,9 +94,7 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  objectFactory->spawnPlanet(Vec3(0.0f), 0.2f, Vec3(1.0f), 1000.0f, Vec3(0.0f));
-  objectFactory->spawnPlanet(Vec3(5.0f, 0.0f, 0.0f), 0.1f, Vec3(1.0f), 10.0f,
-                             Vec3(0.0f, 0.0f, -6.0f));
+  parsePreset(this->objectFactory, "../presets/three_planets.txt");
 }
 
 void Engine::Update(float timeStep) {

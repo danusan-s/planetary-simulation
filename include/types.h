@@ -84,7 +84,9 @@ struct Sprite {
   ModelID modelID;
   Vec3 color;
 
-  Sprite() : textureID(""), shaderID(""), color(Vec3(1.0f, 1.0f, 1.0f)) {
+  Sprite()
+      : textureID(""), shaderID(""), modelID(""),
+        color(Vec3(1.0f, 1.0f, 1.0f)) {
   }
 };
 
