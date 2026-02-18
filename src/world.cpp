@@ -3,11 +3,12 @@
 
 World::World() {
   camera = Camera();
+  sunID = INVALID_ID;
 }
 
-Object &World::CreateObject() {
+ObjectID World::CreateObject() {
   objects.emplace_back();
-  return objects.back();
+  return static_cast<ObjectID>(objects.size() - 1);
 }
 
 SpriteID World::AddSprite(const Sprite &sprite) {

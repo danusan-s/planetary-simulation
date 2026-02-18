@@ -97,8 +97,19 @@ int main(int argc, char *argv[]) {
     // render
     // ------
     float alpha = accumulatedTime / timeStep;
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+    glDisable(GL_SCISSOR_TEST);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // gray bars
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_SCISSOR_TEST);
+    glViewport(engineObj.viewport.x, engineObj.viewport.y,
+               engineObj.viewport.width, engineObj.viewport.height);
+    glScissor(engineObj.viewport.x, engineObj.viewport.y,
+              engineObj.viewport.width, engineObj.viewport.height);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     engineObj.Render(alpha);
 
     glfwSwapBuffers(window);
@@ -126,6 +137,12 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
       engineObj.keys[key] = true;
     else if (action == GLFW_RELEASE)
       engineObj.keys[key] = false;
+  }
+  if (key == GLFW_KEY_CAPS_LOCK && action == GLFW_PRESS) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  }
+  if (key == GLFW_KEY_CAPS_LOCK && action == GLFW_RELEASE) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
 }
 

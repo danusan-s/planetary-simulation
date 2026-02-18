@@ -24,9 +24,10 @@ void setupTrailRenderer(Object &obj) {
   glBindVertexArray(0);
 }
 
-Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
+ObjectID ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
                                    Vec3 initialSpeed, Vec3 color) {
-  Object &obj = this->world->CreateObject();
+  ObjectID objID = this->world->CreateObject();
+  Object &obj = this->world->objects[objID];
 
   Sprite sprite = Sprite();
   sprite.modelID = "sphere";
@@ -48,5 +49,34 @@ Object &ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
 
   setupTrailRenderer(obj);
 
-  return obj;
+  return objID;
+}
+
+ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
+                                Vec3 initialSpeed, Vec3 color) {
+  ObjectID objID = this->world->CreateObject();
+  Object &obj = this->world->objects[objID];
+  this->world->sunID = objID;
+
+  Sprite sprite = Sprite();
+  sprite.modelID = "sphere";
+  sprite.textureID = "solid";
+  sprite.shaderID = "sun";
+  sprite.color = color;
+  obj.spriteID = this->world->AddSprite(sprite);
+
+  Body body = Body();
+  body.mass = mass;
+  body.velocity = initialSpeed;
+  obj.bodyID = this->world->AddBody(body);
+
+  obj.transform.position = position;
+  obj.transform.radius = radius;
+  for (int i = 0; i < MAX_TRAIL; i++) {
+    obj.trail[i] = position;
+  }
+
+  setupTrailRenderer(obj);
+
+  return objID;
 }

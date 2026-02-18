@@ -37,7 +37,8 @@ void parsePreset(ObjectFactory *factory, const char *filePath) {
   std::string line;
   while (std::getline(presetFile, line)) {
     std::cout << "Read line: " << line << std::endl;
-    if (line == "planet") {
+    if (line == "planet" || line == "sun") {
+      std::string type = line;
       std::cout << "Parsing planet definition" << std::endl;
       float posX, posY, posZ, radius, mass, velX, velY, velZ, colorR, colorG,
           colorB;
@@ -61,9 +62,13 @@ void parsePreset(ObjectFactory *factory, const char *filePath) {
           iss >> colorR >> colorG >> colorB;
         }
       }
-      factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
-                           Vec3(velX, velY, velZ),
-                           Vec3(colorR, colorG, colorB));
+      if (type == "planet")
+        factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
+                             Vec3(velX, velY, velZ),
+                             Vec3(colorR, colorG, colorB));
+      else if (type == "sun")
+        factory->spawnSun(Vec3(posX, posY, posZ), radius, mass,
+                          Vec3(velX, velY, velZ), Vec3(colorR, colorG, colorB));
     }
   }
 }
@@ -80,6 +85,8 @@ void Engine::Init() {
                               nullptr, "debug");
   ResourceManager::LoadShader("../shaders/trail.vert", "../shaders/trail.frag",
                               nullptr, "trail");
+  ResourceManager::LoadShader("../shaders/diffuse.vert", "../shaders/sun.frag",
+                              nullptr, "sun");
 
   this->world = new World();
   this->renderer = new RenderSystem();

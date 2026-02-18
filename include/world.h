@@ -12,8 +12,9 @@ public:
   std::vector<Object> objects;
   std::vector<Sprite> sprites;
   std::vector<Body> bodies;
+  SunID sunID; // Pointer to the sun object for easy access
 
-  Object &CreateObject();
+  ObjectID CreateObject();
   SpriteID AddSprite(const Sprite &sprite);
   BodyID AddBody(const Body &body);
 };

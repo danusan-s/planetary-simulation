@@ -52,19 +52,26 @@ void RenderSystem::renderWorld(World *world, float alpha) {
     const Shader &shader = ResourceManager::GetShader(sprite.shaderID);
     const glm::vec3 color = sprite.color;
 
+    if (world->sunID == INVALID_ID)
+      continue;
+
+    const Object &sun = world->objects[world->sunID];
+    const Sprite &sunSprite = world->sprites[sun.spriteID];
+
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,
                               static_cast<glm::vec3>(obj.transform.position));
     modelMat = glm::scale(modelMat, glm::vec3(obj.transform.radius));
 
     this->renderer->renderModel(modelMat, world->camera, model, texture, shader,
-                                color);
+                                color, sun.transform.position,
+                                sunSprite.color);
 
     const Shader &trailShader = ResourceManager::GetShader("trail");
     trailShader.Use();
     trailShader.SetMatrix4("view", world->camera.GetViewMatrix());
     trailShader.SetMatrix4("projection", world->camera.GetProjectionMatrix());
-    trailShader.SetVector3f("trailColor", color * 0.5f);
+    trailShader.SetVector3f("trailColor", color * 2.0f);
 
     glBindVertexArray(obj.trailVAO);
     int start = (obj.trailHead + 1) % MAX_TRAIL;
