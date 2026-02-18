@@ -95,15 +95,17 @@ void Engine::Init() {
   // load textures
   std::cout << "Loading Textures" << std::endl;
   ResourceManager::LoadTexture("../textures/plain.png", false, "solid");
+  ResourceManager::LoadTexture("../textures/earth.png", false, "earth");
 
   // load models
   std::cout << "Loading Models" << std::endl;
-  ResourceManager::LoadModel("../models/quad_sphere.obj", "sphere");
+  ResourceManager::LoadModel("../models/quad_sphere.obj", "quad_sphere");
   ResourceManager::LoadModel("../models/cube.obj", "cube");
+  ResourceManager::LoadModel("../models/uv_sphere.obj", "sphere");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  parsePreset(this->objectFactory, "../presets/three_planets.txt");
+  parsePreset(this->objectFactory, "../presets/simple_orbit.txt");
 }
 
 void Engine::Update(float timeStep) {

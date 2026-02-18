@@ -23,7 +23,9 @@ void main()
 
     vec3 diffuse = diff * lightColor;
 
-    vec3 result = diffuse * objectColor;
+    vec3 textureColor = texture(Tex, TexCoords).rgb;
+
+    vec3 result = diffuse * objectColor * textureColor;
 
     FragColor = vec4(result, 1.0);
 }

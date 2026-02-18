@@ -9,7 +9,7 @@ PhysicsSystem::~PhysicsSystem() {
 }
 
 const float G = 0.001f;
-const int sampleCount = 4;
+const int sampleCount = 2;
 
 void PhysicsSystem::step(World *world, float dt) {
 

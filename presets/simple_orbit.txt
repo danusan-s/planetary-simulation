@@ -1,0 +1,13 @@
+sun
+pos 0 0 0
+radius 0.4
+mass 1000
+vel 0 0 0 
+color 1 1 0 
+
+planet
+pos -7 0 0 
+radius 0.2 
+mass 10
+vel 0 0 5
+color 1 1 1 

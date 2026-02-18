@@ -2,7 +2,7 @@ sun
 pos 0 0 0
 radius 0.2
 mass 1000
-vel 0 0 0
+vel 0 0 i1
 color 1 1 1 
 
 planet
