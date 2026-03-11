@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   float lastFrame = 0.0f;
   float accumulatedTime = 0.0f;
 
-  //  60 fps simulation
+  //  240 fps simulation
   const float timeStep = 1 / 240.0f;
 
   while (!glfwWindowShouldClose(window)) {
@@ -130,19 +130,11 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
                   int mode) {
   // when a user presses the escape key, we set the WindowShouldClose property
   // to true, closing the application
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
   if (key >= 0 && key < 1024) {
     if (action == GLFW_PRESS)
-      engineObj.keys[key] = true;
+      engineObj.inputState.keys[key] = true;
     else if (action == GLFW_RELEASE)
-      engineObj.keys[key] = false;
-  }
-  if (key == GLFW_KEY_CAPS_LOCK && action == GLFW_PRESS) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-  }
-  if (key == GLFW_KEY_CAPS_LOCK && action == GLFW_RELEASE) {
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      engineObj.inputState.keys[key] = false;
   }
 }
 
@@ -175,16 +167,17 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    if (engineObj.clickState == RIGHT_CLICK) {
-      engineObj.clickState = BOTH_CLICK;
+    if (engineObj.inputState.clickState == RIGHT_CLICK) {
+      engineObj.inputState.clickState = BOTH_CLICK;
+
     } else {
-      engineObj.clickState = LEFT_CLICK;
+      engineObj.inputState.clickState = LEFT_CLICK;
     }
   } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-    if (engineObj.clickState == LEFT_CLICK) {
-      engineObj.clickState = BOTH_CLICK;
+    if (engineObj.inputState.clickState == LEFT_CLICK) {
+      engineObj.inputState.clickState = BOTH_CLICK;
     } else {
-      engineObj.clickState = RIGHT_CLICK;
+      engineObj.inputState.clickState = RIGHT_CLICK;
     }
   }
 }
@@ -193,6 +186,6 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   float xpos = static_cast<float>(xposIn);
   float ypos = static_cast<float>(yposIn);
 
-  engineObj.mouseX = xpos;
-  engineObj.mouseY = ypos;
+  engineObj.inputState.mouseX = xpos;
+  engineObj.inputState.mouseY = ypos;
 }

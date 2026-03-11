@@ -8,8 +8,9 @@ PhysicsSystem::PhysicsSystem() {
 PhysicsSystem::~PhysicsSystem() {
 }
 
-const float G = 0.001f;
-const int sampleCount = 2;
+const float G = 0.0000017f;
+const float epsilon = 0.0001f;
+const int sampleCount = 4;
 
 void PhysicsSystem::step(World *world, float dt) {
 
@@ -31,11 +32,11 @@ void PhysicsSystem::step(World *world, float dt) {
 
       Vec3 delta = objB.transform.position - objA.transform.position;
 
-      float dist = delta.dot(delta);
+      float dist_sq = delta.dot(delta) + epsilon;
       Vec3 direction = delta.normalized();
 
-      bodyA.velocity += direction * (G * bodyB.mass / dist);
-      bodyB.velocity -= direction * (G * bodyA.mass / dist);
+      bodyA.velocity += direction * (G * bodyB.mass / dist_sq) * dt;
+      bodyB.velocity -= direction * (G * bodyA.mass / dist_sq) * dt;
     }
   }
 

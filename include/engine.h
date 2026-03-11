@@ -7,22 +7,9 @@
 #include "object_factory.h"
 #include "physics_system.h"
 #include "render_system.h"
+#include "types.h"
 #include "world.h"
 #include <GLFW/glfw3.h>
-
-struct Viewport {
-  int x;
-  int y;
-  int width;
-  int height;
-};
-
-enum Click {
-  NO_CLICK,
-  LEFT_CLICK,
-  RIGHT_CLICK,
-  BOTH_CLICK,
-};
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -38,10 +25,7 @@ private:
 
 public:
   // game state
-  bool keys[1024];
-  Click clickState;
-  float mouseX, mouseY;
-  float lastMouseX, lastMouseY;
+  InputState inputState;
   Viewport viewport;
 
   // constructor/destructor

@@ -4,41 +4,13 @@
 #include <glm/ext/matrix_float4x4.hpp>
 
 RenderSystem::RenderSystem() {
-  this->renderer = new ModelRenderer();
-  setupDebugData();
+  this->modelRenderer = new ModelRenderer();
+  this->widgetRenderer = new WidgetRenderer();
 }
 
 RenderSystem::~RenderSystem() {
-  delete this->renderer;
-}
-
-void RenderSystem::setupDebugData() {
-  // Debug render
-  float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  0.5f, -0.5f, -0.5f,
-                      1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,  0.5f,
-                      0.5f,  -0.5f, 1.0f,  1.0f,  -0.5f, 0.5f, -0.5f, 0.0f,
-                      1.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  0.0f};
-
-  GLuint VBO;
-
-  glGenVertexArrays(1, &debugVAO);
-  glGenBuffers(1, &VBO);
-
-  glBindVertexArray(debugVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  // Position (location = 0)
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  // UV (location = 1)
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glBindVertexArray(0);
+  delete this->modelRenderer;
+  delete this->widgetRenderer;
 }
 
 void RenderSystem::renderWorld(World *world, float alpha) {
@@ -63,9 +35,9 @@ void RenderSystem::renderWorld(World *world, float alpha) {
                               static_cast<glm::vec3>(obj.transform.position));
     modelMat = glm::scale(modelMat, glm::vec3(obj.transform.radius));
 
-    this->renderer->renderModel(modelMat, world->camera, model, texture, shader,
-                                color, sun.transform.position,
-                                sunSprite.color);
+    this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
+                                     shader, color, sun.transform.position,
+                                     sunSprite.color);
 
     const Shader &trailShader = ResourceManager::GetShader("trail");
     trailShader.Use();
@@ -83,10 +55,15 @@ void RenderSystem::renderWorld(World *world, float alpha) {
       glDrawArrays(GL_LINE_STRIP, 0, start);
     }
   }
+}
 
-  // Debug render
-  // ResourceManager::GetShader("debug").Use();
-  // glBindVertexArray(debugVAO);
-  // glDrawArrays(GL_TRIANGLES, 0, 6);
-  // glBindVertexArray(0);
+void RenderSystem::renderGUI(World *world, Viewport &viewport) {
+  glDisable(GL_DEPTH_TEST);
+  for (const auto &widget : world->widgets) {
+    const Texture2D &texture = ResourceManager::GetTexture("solid");
+    const Shader &shader = ResourceManager::GetShader("debug");
+    this->widgetRenderer->renderWidget(widget, texture, shader, glm::vec3(1.0f),
+                                       viewport.width, viewport.height);
+  }
+  glEnable(GL_DEPTH_TEST);
 }

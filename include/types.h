@@ -69,6 +69,12 @@ struct Vec3 {
     return Vec3(x * scalar, y * scalar, z * scalar);
   }
 
+  Vec3 operator/(float scalar) {
+    if (scalar == 0.0f)
+      return Vec3(0.0f);
+    return Vec3(x / scalar, y / scalar, z / scalar);
+  }
+
   operator glm::vec3() const {
     return glm::vec3(x, y, z);
   }
@@ -122,6 +128,35 @@ struct Object {
     glBindBuffer(GL_ARRAY_BUFFER, trailVBO);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vec3) * trailHead, sizeof(Vec3),
                     &trail[trailHead]);
+  }
+};
+
+struct Viewport {
+  int x;
+  int y;
+  int width;
+  int height;
+};
+
+enum ClickState {
+  NO_CLICK,
+  LEFT_CLICK,
+  RIGHT_CLICK,
+  BOTH_CLICK,
+};
+
+struct InputState {
+  bool keys[1024];
+  ClickState clickState;
+  float mouseX, mouseY;
+  float lastMouseX, lastMouseY;
+
+  InputState()
+      : clickState(NO_CLICK), mouseX(0.0f), mouseY(0.0f), lastMouseX(0.0f),
+        lastMouseY(0.0f) {
+    for (int i = 0; i < 1024; ++i) {
+      keys[i] = false;
+    }
   }
 };
 

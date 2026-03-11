@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "camera.h"
 #include "resource_manager.h"
+#include <GLFW/glfw3.h>
 #include <fstream>
 #include <iostream>
 
@@ -8,12 +9,6 @@ Engine::Engine() {
   this->physics = PhysicsSystem();
   this->renderer = nullptr;
   this->objectFactory = nullptr;
-  this->clickState = NO_CLICK;
-
-  this->mouseX = 0.0f;
-  this->mouseY = 0.0f;
-  this->lastMouseX = 0.0f;
-  this->lastMouseY = 0.0f;
 }
 
 Engine::~Engine() {
@@ -106,6 +101,9 @@ void Engine::Init() {
   // create objects
   std::cout << "Creating Objects" << std::endl;
   parsePreset(this->objectFactory, "../presets/simple_orbit.txt");
+
+  std::cout << "Creating GUI" << std::endl;
+  // To be implemented later
 }
 
 void Engine::Update(float timeStep) {
@@ -113,25 +111,39 @@ void Engine::Update(float timeStep) {
 }
 
 void Engine::ProcessInput(float deltaTime) {
-  float xoffset = this->mouseX - this->lastMouseX;
-  float yoffset =
-      this->lastMouseY -
-      this->mouseY; // reversed since y-coordinates go from bottom to top
-  this->world->camera.ProcessMouseMovement(xoffset, yoffset);
+  if (this->inputState.keys[GLFW_KEY_ESCAPE]) {
+    glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+  }
+  if (this->inputState.keys[GLFW_KEY_LEFT_CONTROL]) {
+    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    for (auto &widget : this->world->widgets) {
+      widget.update(this->inputState);
+    }
+  } else {
+    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR,
+                     GLFW_CURSOR_DISABLED);
+    float xoffset = this->inputState.mouseX - this->inputState.lastMouseX;
+    float yoffset =
+        this->inputState.lastMouseY -
+        this->inputState
+            .mouseY; // reversed since y-coordinates go from bottom to top
+    this->world->camera.ProcessMouseMovement(xoffset, yoffset);
 
-  this->lastMouseX = this->mouseX;
-  this->lastMouseY = this->mouseY;
+    if (this->inputState.keys[GLFW_KEY_W])
+      this->world->camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (this->inputState.keys[GLFW_KEY_S])
+      this->world->camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (this->inputState.keys[GLFW_KEY_A])
+      this->world->camera.ProcessKeyboard(LEFT, deltaTime);
+    if (this->inputState.keys[GLFW_KEY_D])
+      this->world->camera.ProcessKeyboard(RIGHT, deltaTime);
+  }
 
-  if (keys[GLFW_KEY_W])
-    this->world->camera.ProcessKeyboard(FORWARD, deltaTime);
-  if (keys[GLFW_KEY_S])
-    this->world->camera.ProcessKeyboard(BACKWARD, deltaTime);
-  if (keys[GLFW_KEY_A])
-    this->world->camera.ProcessKeyboard(LEFT, deltaTime);
-  if (keys[GLFW_KEY_D])
-    this->world->camera.ProcessKeyboard(RIGHT, deltaTime);
+  this->inputState.lastMouseX = this->inputState.mouseX;
+  this->inputState.lastMouseY = this->inputState.mouseY;
 }
 
 void Engine::Render(float alpha) {
   this->renderer->renderWorld(this->world, alpha);
+  this->renderer->renderGUI(this->world, this->viewport);
 }
