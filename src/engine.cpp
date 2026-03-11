@@ -141,7 +141,7 @@ void Engine::Init() {
   std::cout << "Loading Models" << std::endl;
   ResourceManager::LoadModel("../models/quad_sphere.obj", "quad_sphere");
   ResourceManager::LoadModel("../models/cube.obj", "cube");
-  ResourceManager::LoadModel("../models/flip_uv_sphere.obj", "sphere");
+  ResourceManager::LoadModel("../models/uv_sphere_high.obj", "sphere");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
