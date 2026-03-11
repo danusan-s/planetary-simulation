@@ -20,7 +20,7 @@ void main()
 
     // Lambert diffuse term
     float diff = max(dot(normal, lightDir), 0.0);
-    float ambi = 0.1;
+    float ambi = 0.05; // Ambient strength
 
     vec3 diffuse = diff * lightColor;
 
