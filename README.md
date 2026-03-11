@@ -84,13 +84,11 @@ make
 
 ## Running the Simulation
 
-Run the executable from the `build/` directory so relative asset paths resolve correctly:
+You can run the executable from any directory. For example, from the project root:
 
 ```bash
-./PlanetarySystem
+./build/PlanetarySystem
 ```
-
-If shaders, textures, or models fail to load, confirm you launched the program from `build/`.
 
 ## Controls
 
@@ -157,5 +155,4 @@ This project has been a good hands-on exercise for learning:
 
 ## Notes
 
-- The current implementation uses relative paths for assets.
 - The simulation is designed as a learning project and can be extended into a more advanced engine or sandbox.
