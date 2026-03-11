@@ -18,14 +18,18 @@ void main()
     vec3 normal = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
 
+
     // Lambert diffuse term
     float diff = max(dot(normal, lightDir), 0.0);
+    float ambi = 0.1;
 
     vec3 diffuse = diff * lightColor;
 
+    vec3 ambient = ambi * lightColor;
+
     vec3 textureColor = texture(Tex, TexCoords).rgb;
 
-    vec3 result = diffuse * objectColor * textureColor;
+    vec3 result = (ambient + diffuse) * textureColor * objectColor;
 
     FragColor = vec4(result, 1.0);
 }

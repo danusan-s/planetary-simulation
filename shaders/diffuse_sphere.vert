@@ -1,0 +1,26 @@
+#version 330 core
+
+// Vertex attributes
+layout(location = 0) in vec3 aPos;    // x, y, z
+layout(location = 1) in vec3 aNormal; // nx, ny, nz
+layout(location = 2) in vec2 aUV;     // u, v
+
+// Uniforms
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out vec3 FragPos;
+out vec3 Normal;
+out vec2 TexCoords;
+
+void main()
+{
+    FragPos = vec3(model * vec4(aPos, 1.0f));
+    vec3 center = vec3(model * vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    Normal = FragPos - center;
+    TexCoords = aUV;
+
+    gl_Position = projection * view * model * vec4(aPos, 1.0f);
+}
+
