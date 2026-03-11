@@ -110,7 +110,7 @@ void Engine::Init() {
 
   // load shaders
   std::cout << "Loading Shaders" << std::endl;
-  ResourceManager::LoadShader("../shaders/diffuse_sphere.vert",
+  ResourceManager::LoadShader("../shaders/diffuse.vert",
                               "../shaders/diffuse.frag", nullptr, "diffuse");
   ResourceManager::LoadShader("../shaders/debug.vert", "../shaders/debug.frag",
                               nullptr, "debug");
@@ -139,9 +139,8 @@ void Engine::Init() {
 
   // load models
   std::cout << "Loading Models" << std::endl;
-  ResourceManager::LoadModel("../models/quad_sphere.obj", "quad_sphere");
   ResourceManager::LoadModel("../models/cube.obj", "cube");
-  ResourceManager::LoadModel("../models/uv_sphere.obj", "sphere");
+  ResourceManager::LoadModel("../models/sphere_smooth.obj", "sphere");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;

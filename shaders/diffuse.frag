@@ -18,7 +18,6 @@ void main()
     vec3 normal = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
 
-
     // Lambert diffuse term
     float diff = max(dot(normal, lightDir), 0.0);
     float ambi = 0.1;
