@@ -6,6 +6,7 @@
 
 #include <glad/glad.h>
 
+#include "cubemap.h"
 #include "model.h"
 #include "shader.h"
 #include "texture.h"
@@ -21,6 +22,7 @@ public:
   static std::map<std::string, Shader> Shaders;
   static std::map<std::string, Texture2D> Textures;
   static std::map<std::string, Model> Models;
+  static std::map<std::string, Cubemap> Cubemaps;
   // loads (and generates) a shader program from file loading vertex, fragment
   // (and geometry) shader's source code. If gShaderFile is not nullptr, it also
   // loads a geometry shader
@@ -34,6 +36,11 @@ public:
   static Texture2D GetTexture(std::string name);
   // returns true if texture exists, false otherwise
   static bool TextureExists(std::string name);
+  // loads (and generates) a texture from file
+  static Cubemap LoadCubemap(std::vector<const char *> file, bool alpha,
+                             std::string name);
+  // retrieves a stored texture
+  static Cubemap GetCubemap(std::string name);
   // loads (and generates) a model from file
   static Model LoadModel(const char *file, std::string name);
   // retrieves a stored model
@@ -52,6 +59,9 @@ private:
                                    const char *gShaderFile = nullptr);
   // loads a single texture from file
   static Texture2D loadTextureFromFile(const char *file, bool alpha);
+  // loads a single texture from file
+  static Cubemap loadCubemapFromFile(std::vector<const char *> file,
+                                     bool alpha);
   // loads a single model from file
   static Model loadModelFromFile(const char *file);
 };

@@ -118,6 +118,8 @@ void Engine::Init() {
                               nullptr, "trail");
   ResourceManager::LoadShader("../shaders/diffuse.vert", "../shaders/sun.frag",
                               nullptr, "sun");
+  ResourceManager::LoadShader("../shaders/skybox.vert",
+                              "../shaders/skybox.frag", nullptr, "skybox");
 
   this->physics = new PhysicsSystem();
   this->world = new World();
@@ -137,6 +139,13 @@ void Engine::Init() {
   ResourceManager::LoadTexture("../textures/uranus.jpg", false, "uranus");
   ResourceManager::LoadTexture("../textures/neptune.jpg", false, "neptune");
 
+  // load cubemap
+  std::cout << "Loading Cubemap" << std::endl;
+  ResourceManager::LoadCubemap({"../textures/_px.jpg", "../textures/_nx.jpg",
+                                "../textures/_py.jpg", "../textures/_ny.jpg",
+                                "../textures/_pz.jpg", "../textures/_nz.jpg"},
+                               false, "space");
+
   // load models
   std::cout << "Loading Models" << std::endl;
   ResourceManager::LoadModel("../models/cube.obj", "cube");
@@ -147,7 +156,7 @@ void Engine::Init() {
   parsePreset(this->objectFactory, this->physics,
               "../presets/solar_system.txt");
 
-  std::cout << "Creating GUI" << std::endl;
+  // std::cout << "Creating GUI" << std::endl;
   // To be implemented later
 }
 

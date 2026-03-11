@@ -5,11 +5,13 @@
 
 RenderSystem::RenderSystem() {
   this->modelRenderer = new ModelRenderer();
+  this->skyboxRenderer = new SkyboxRenderer();
   this->widgetRenderer = new WidgetRenderer();
 }
 
 RenderSystem::~RenderSystem() {
   delete this->modelRenderer;
+  delete this->skyboxRenderer;
   delete this->widgetRenderer;
 }
 
@@ -55,6 +57,10 @@ void RenderSystem::renderWorld(World *world, float alpha) {
       glDrawArrays(GL_LINE_STRIP, 0, start);
     }
   }
+
+  const Cubemap &skybox = ResourceManager::GetCubemap("space");
+  const Shader &skyboxShader = ResourceManager::GetShader("skybox");
+  skyboxRenderer->render(world->camera, skybox, skyboxShader);
 }
 
 void RenderSystem::renderGUI(World *world, Viewport &viewport) {

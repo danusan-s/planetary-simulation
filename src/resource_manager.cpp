@@ -1,4 +1,5 @@
 #include "resource_manager.h"
+#include "cubemap.h"
 
 #include <fstream>
 #include <iostream>
@@ -10,6 +11,7 @@
 
 // Instantiate static variables
 std::map<std::string, Texture2D> ResourceManager::Textures;
+std::map<std::string, Cubemap> ResourceManager::Cubemaps;
 std::map<std::string, Shader> ResourceManager::Shaders;
 std::map<std::string, Model> ResourceManager::Models;
 
@@ -38,6 +40,17 @@ Texture2D ResourceManager::GetTexture(std::string name) {
 
 bool ResourceManager::TextureExists(std::string name) {
   return Textures.find(name) != Textures.end();
+}
+
+Cubemap ResourceManager::LoadCubemap(std::vector<const char *> files,
+                                     bool alpha, std::string name) {
+  std::cout << "> Loading Cubemap: " << name << std::endl;
+  Cubemaps[name] = loadCubemapFromFile(files, alpha);
+  return Cubemaps[name];
+}
+
+Cubemap ResourceManager::GetCubemap(std::string name) {
+  return Cubemaps[name];
 }
 
 Model ResourceManager::LoadModel(const char *file, std::string name) {
@@ -124,6 +137,7 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha) {
     texture.Internal_Format = GL_RGBA;
     texture.Image_Format = GL_RGBA;
   }
+  std::cout << "Loading texture file: " << file << std::endl;
   // load image
   int width, height, nrChannels;
   unsigned char *data = stbi_load(file, &width, &height, &nrChannels, 0);
@@ -133,6 +147,42 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha) {
   // and finally free image data
   stbi_image_free(data);
   return texture;
+}
+
+Cubemap ResourceManager::loadCubemapFromFile(std::vector<const char *> file,
+                                             bool alpha) {
+  // create texture object
+  Cubemap cubemap;
+  if (alpha) {
+    cubemap.Internal_Format = GL_RGBA;
+    cubemap.Image_Format = GL_RGBA;
+  }
+  std::vector<unsigned int> widthList;
+  std::vector<unsigned int> heightList;
+  std::vector<unsigned char *> dataList;
+  for (const auto &f : file) {
+    std::cout << "Loading cubemap face: " << f << std::endl;
+    // load image
+    int width, height, nrChannels = 0;
+    stbi_set_flip_vertically_on_load(false);
+    unsigned char *data = stbi_load(f, &width, &height, &nrChannels, 0);
+    if (data == nullptr) {
+      std::cerr << "Failed to load cubemap face: " << f << std::endl;
+      continue;
+    }
+    widthList.push_back(width);
+    heightList.push_back(height);
+    dataList.push_back(data);
+  }
+
+  // now generate texture
+  cubemap.Generate(widthList, heightList, dataList);
+
+  for (auto data : dataList) {
+    stbi_image_free(data);
+  }
+
+  return cubemap;
 }
 
 Model ResourceManager::loadModelFromFile(const char *file) {

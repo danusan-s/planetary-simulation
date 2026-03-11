@@ -2,6 +2,7 @@
 #define RENDER_SYSTEM_H
 
 #include "model_renderer.h"
+#include "skybox_renderer.h"
 #include "widget_renderer.h"
 #include "world.h"
 
@@ -15,6 +16,7 @@ public:
 
 private:
   ModelRenderer *modelRenderer;
+  SkyboxRenderer *skyboxRenderer;
   WidgetRenderer *widgetRenderer;
 };
 
