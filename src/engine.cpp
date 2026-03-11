@@ -190,14 +190,25 @@ void Engine::ProcessInput(float deltaTime) {
             .mouseY; // reversed since y-coordinates go from bottom to top
     this->world->camera.ProcessMouseMovement(xoffset, yoffset);
 
-    if (this->inputState.keys[GLFW_KEY_W])
+    bool isMoving = false;
+    if (this->inputState.keys[GLFW_KEY_W]) {
       this->world->camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (this->inputState.keys[GLFW_KEY_S])
+      isMoving = true;
+    }
+    if (this->inputState.keys[GLFW_KEY_S]) {
       this->world->camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (this->inputState.keys[GLFW_KEY_A])
+      isMoving = true;
+    }
+    if (this->inputState.keys[GLFW_KEY_A]) {
       this->world->camera.ProcessKeyboard(LEFT, deltaTime);
-    if (this->inputState.keys[GLFW_KEY_D])
+      isMoving = true;
+    }
+    if (this->inputState.keys[GLFW_KEY_D]) {
       this->world->camera.ProcessKeyboard(RIGHT, deltaTime);
+      isMoving = true;
+    }
+
+    this->world->camera.UpdateSpeed(isMoving, deltaTime);
   }
 
   this->inputState.lastMouseX = this->inputState.mouseX;
