@@ -110,17 +110,22 @@ void Engine::Init() {
   srand(static_cast<unsigned int>(time(0)));
 
   // load shaders
-  std::cout << "Loading Shaders" << std::endl;
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
-                              Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "diffuse");
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/debug.vert").c_str(), Utils::GetAssetPath("shaders/debug.frag").c_str(),
+  std::cout << ">> Loading Shaders" << std::endl;
+  ResourceManager::LoadShader(
+      Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
+      Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "diffuse");
+  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/debug.vert").c_str(),
+                              Utils::GetAssetPath("shaders/debug.frag").c_str(),
                               nullptr, "debug");
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/trail.vert").c_str(), Utils::GetAssetPath("shaders/trail.frag").c_str(),
+  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/trail.vert").c_str(),
+                              Utils::GetAssetPath("shaders/trail.frag").c_str(),
                               nullptr, "trail");
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/diffuse.vert").c_str(), Utils::GetAssetPath("shaders/sun.frag").c_str(),
-                              nullptr, "sun");
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/skybox.vert").c_str(),
-                              Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
+  ResourceManager::LoadShader(
+      Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
+      Utils::GetAssetPath("shaders/sun.frag").c_str(), nullptr, "sun");
+  ResourceManager::LoadShader(
+      Utils::GetAssetPath("shaders/skybox.vert").c_str(),
+      Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
 
   this->physics = new PhysicsSystem();
   this->world = new World();
@@ -128,35 +133,46 @@ void Engine::Init() {
   this->objectFactory = new ObjectFactory(this->world);
 
   // load textures
-  std::cout << "Loading Textures" << std::endl;
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/plain.png").c_str(), false, "solid");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/sun.jpg").c_str(), false, "sun");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/earth.jpg").c_str(), false, "earth");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/mercury.jpg").c_str(), false, "mercury");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/venus.jpg").c_str(), false, "venus");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/mars.jpg").c_str(), false, "mars");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/jupiter.jpg").c_str(), false, "jupiter");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/saturn.jpg").c_str(), false, "saturn");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/uranus.jpg").c_str(), false, "uranus");
-  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/neptune.jpg").c_str(), false, "neptune");
+  std::cout << ">> Loading Textures" << std::endl;
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/plain.png").c_str(), false, "solid");
+  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/sun.jpg").c_str(),
+                               false, "sun");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/earth.jpg").c_str(), false, "earth");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/mercury.jpg").c_str(), false, "mercury");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/venus.jpg").c_str(), false, "venus");
+  ResourceManager::LoadTexture(Utils::GetAssetPath("textures/mars.jpg").c_str(),
+                               false, "mars");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/jupiter.jpg").c_str(), false, "jupiter");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/saturn.jpg").c_str(), false, "saturn");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/uranus.jpg").c_str(), false, "uranus");
+  ResourceManager::LoadTexture(
+      Utils::GetAssetPath("textures/neptune.jpg").c_str(), false, "neptune");
 
   // load cubemap
-  std::cout << "Loading Cubemap" << std::endl;
+  std::cout << ">> Loading Cubemaps" << std::endl;
   std::string px = Utils::GetAssetPath("textures/_px.jpg");
   std::string nx = Utils::GetAssetPath("textures/_nx.jpg");
   std::string py = Utils::GetAssetPath("textures/_py.jpg");
   std::string ny = Utils::GetAssetPath("textures/_ny.jpg");
   std::string pz = Utils::GetAssetPath("textures/_pz.jpg");
   std::string nz = Utils::GetAssetPath("textures/_nz.jpg");
-  ResourceManager::LoadCubemap({px.c_str(), nx.c_str(),
-                                py.c_str(), ny.c_str(),
-                                pz.c_str(), nz.c_str()},
-                               false, "space");
+  ResourceManager::LoadCubemap(
+      {px.c_str(), nx.c_str(), py.c_str(), ny.c_str(), pz.c_str(), nz.c_str()},
+      false, "space");
 
   // load models
-  std::cout << "Loading Models" << std::endl;
-  ResourceManager::LoadModel(Utils::GetAssetPath("models/cube.obj").c_str(), "cube");
-  ResourceManager::LoadModel(Utils::GetAssetPath("models/sphere_smooth.obj").c_str(), "sphere");
+  std::cout << ">> Loading Models" << std::endl;
+  ResourceManager::LoadModel(Utils::GetAssetPath("models/cube.obj").c_str(),
+                             "cube");
+  ResourceManager::LoadModel(
+      Utils::GetAssetPath("models/sphere_smooth.obj").c_str(), "sphere");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;

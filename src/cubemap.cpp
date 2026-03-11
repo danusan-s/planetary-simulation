@@ -28,11 +28,6 @@ void Cubemap::Generate(std::vector<unsigned int> width,
   assert(data.size() == 6); // Ensure we have 6 images for the cubemap
 
   for (unsigned int i = 0; i < 6; i++) {
-    // Had an error here due to images not being in a size that is power of 2
-    // Specify the texture image
-    std::cout << "Uploading cubemap face " << i << " with dimensions "
-              << width[i] << "x" << height[i] << std::endl;
-
     glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0,
                  this->Internal_Format, width[i], height[i], 0,
                  this->Image_Format, GL_UNSIGNED_BYTE, data[i]);

@@ -10,14 +10,11 @@ A real-time 3D planetary simulation built with C++ and OpenGL. The project combi
 
 ## Screenshots and GIFs
 
-Placeholder section where I will add images later
+![Main Scene](docs/main_scene.png)
+*Full solar system view with lighting, a skybox, and orbital trails.*
 
-Assets to include:
-
-- `docs/main-scene.png` - full solar system view with lighting and trails
-- `docs/camera-flythrough.gif` - short clip showing free-camera movement
-- `docs/simple-orbit.png` - a cleaner preset that highlights orbital motion
-- `docs/system-closeup.png` - close-up of a planet, texture, and trail detail
+![System Closeup](docs/system_closeup.png)
+*Close-up of a planetary body, showcasing textures and dynamic lighting from the sun.*
 
 ## What This Project Does
 
