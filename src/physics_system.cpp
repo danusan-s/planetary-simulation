@@ -2,13 +2,12 @@
 #include "types.h"
 #include <glm/ext/quaternion_geometric.hpp>
 
-PhysicsSystem::PhysicsSystem() {
+PhysicsSystem::PhysicsSystem() : G(1.0f) {
 }
 
 PhysicsSystem::~PhysicsSystem() {
 }
 
-const float G = 0.0000017f;
 const float epsilon = 0.0001f;
 const int sampleCount = 4;
 

@@ -20,7 +20,7 @@ Engine::~Engine() {
   std::cout << "Game Object successfully deleted" << std::endl;
 }
 
-void parsePreset(ObjectFactory *factory, const char *filePath) {
+void parsePreset(ObjectFactory *factory, PhysicsSystem *physics, const char *filePath) {
   std::ifstream presetFile(filePath);
   if (!presetFile.is_open()) {
     std::cerr << "Failed to open preset file: " << filePath << std::endl;
@@ -32,7 +32,22 @@ void parsePreset(ObjectFactory *factory, const char *filePath) {
   std::string line;
   while (std::getline(presetFile, line)) {
     std::cout << "Read line: " << line << std::endl;
-    if (line == "planet" || line == "sun") {
+    if (line == "constants") {
+      std::cout << "Parsing constants" << std::endl;
+      while (std::getline(presetFile, line)) {
+        if (line.empty())
+          break; // End of constants definition
+
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
+
+        if (prefix == "G") {
+          iss >> physics->G;
+          std::cout << "Set G constant to: " << physics->G << std::endl;
+        }
+      }
+    } else if (line == "planet" || line == "sun") {
       std::string type = line;
       std::cout << "Parsing planet definition" << std::endl;
       float posX, posY, posZ, radius, mass, velX, velY, velZ, colorR, colorG,
@@ -100,7 +115,7 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  parsePreset(this->objectFactory, "../presets/simple_orbit.txt");
+  parsePreset(this->objectFactory, &this->physics, "../presets/solar_system.txt");
 
   std::cout << "Creating GUI" << std::endl;
   // To be implemented later

@@ -9,6 +9,7 @@ public:
   ~PhysicsSystem();
 
   int counter = 0;
+  float G = 1.0f;
 
   void step(World *world, float dt);
 };
