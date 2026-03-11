@@ -13,7 +13,7 @@ void setupTrailRenderer(Object &obj) {
   glBindVertexArray(obj.trailVAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, obj.trailVBO);
-  glBufferData(GL_ARRAY_BUFFER, MAX_TRAIL * sizeof(Vec3), nullptr,
+  glBufferData(GL_ARRAY_BUFFER, MAX_TRAIL * sizeof(Vec3), obj.trail,
                GL_DYNAMIC_DRAW);
 
   // Position (location = 0)

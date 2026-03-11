@@ -9,7 +9,6 @@ PhysicsSystem::~PhysicsSystem() {
 }
 
 const float epsilon = 0.0001f;
-const int sampleCount = 4;
 
 void PhysicsSystem::step(World *world, float dt) {
 
@@ -46,7 +45,22 @@ void PhysicsSystem::step(World *world, float dt) {
     Body &body = world->bodies[obj.bodyID];
 
     obj.transform.position += body.velocity * dt;
-    if (counter % sampleCount == 0)
+
+    float speed_sq = body.velocity.dot(body.velocity);
+    float speed = std::sqrt(speed_sq);
+
+    // Avoid division by zero
+    if (speed < 0.1f)
+      speed = 0.1f;
+
+    // Inverse relationship:
+    // Higher speed -> lower sample rate (more frequent sampling)
+    int dynamicSampleRate = static_cast<int>(30.0f / speed);
+
+    if (dynamicSampleRate < 1)
+      dynamicSampleRate = 1;
+
+    if (counter % dynamicSampleRate == 0)
       obj.updateTrail(obj.transform.position);
   }
   ++counter;

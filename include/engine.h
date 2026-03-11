@@ -16,7 +16,7 @@
 // easy access to each of the components and manageability.
 class Engine {
 private:
-  PhysicsSystem physics;
+  PhysicsSystem *physics;
 
   // Init render related stuff later as it needs OpenGL context
   RenderSystem *renderer;

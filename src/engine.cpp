@@ -6,7 +6,7 @@
 #include <iostream>
 
 Engine::Engine() {
-  this->physics = PhysicsSystem();
+  this->physics = nullptr;
   this->renderer = nullptr;
   this->objectFactory = nullptr;
 }
@@ -14,8 +14,18 @@ Engine::Engine() {
 Engine::~Engine() {
   std::cout << "Attempting to delete Engine Object" << std::endl;
 
-  delete this->renderer;
-  delete this->objectFactory;
+  if (this->physics) {
+    std::cout << "Deleting Physics System" << std::endl;
+    delete this->physics;
+  }
+  if (this->renderer) {
+    std::cout << "Deleting Render System" << std::endl;
+    delete this->renderer;
+  }
+  if (this->objectFactory) {
+    std::cout << "Deleting Object Factory" << std::endl;
+    delete this->objectFactory;
+  }
 
   std::cout << "Game Object successfully deleted" << std::endl;
 }
@@ -109,6 +119,7 @@ void Engine::Init() {
   ResourceManager::LoadShader("../shaders/diffuse.vert", "../shaders/sun.frag",
                               nullptr, "sun");
 
+  this->physics = new PhysicsSystem();
   this->world = new World();
   this->renderer = new RenderSystem();
   this->objectFactory = new ObjectFactory(this->world);
@@ -134,7 +145,7 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  parsePreset(this->objectFactory, &this->physics,
+  parsePreset(this->objectFactory, this->physics,
               "../presets/solar_system.txt");
 
   std::cout << "Creating GUI" << std::endl;
@@ -142,7 +153,7 @@ void Engine::Init() {
 }
 
 void Engine::Update(float timeStep) {
-  this->physics.step(this->world, timeStep);
+  this->physics->step(this->world, timeStep);
 }
 
 void Engine::ProcessInput(float deltaTime) {
