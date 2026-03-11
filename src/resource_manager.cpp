@@ -36,6 +36,10 @@ Texture2D ResourceManager::GetTexture(std::string name) {
   return Textures[name];
 }
 
+bool ResourceManager::TextureExists(std::string name) {
+  return Textures.find(name) != Textures.end();
+}
+
 Model ResourceManager::LoadModel(const char *file, std::string name) {
   std::cout << "> Loading Model: " << name << std::endl;
   Models[name] = loadModelFromFile(file);

@@ -32,6 +32,8 @@ public:
   static Texture2D LoadTexture(const char *file, bool alpha, std::string name);
   // retrieves a stored texture
   static Texture2D GetTexture(std::string name);
+  // returns true if texture exists, false otherwise
+  static bool TextureExists(std::string name);
   // loads (and generates) a model from file
   static Model LoadModel(const char *file, std::string name);
   // retrieves a stored model

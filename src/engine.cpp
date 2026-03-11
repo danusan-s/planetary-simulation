@@ -20,7 +20,8 @@ Engine::~Engine() {
   std::cout << "Game Object successfully deleted" << std::endl;
 }
 
-void parsePreset(ObjectFactory *factory, PhysicsSystem *physics, const char *filePath) {
+void parsePreset(ObjectFactory *factory, PhysicsSystem *physics,
+                 const char *filePath) {
   std::ifstream presetFile(filePath);
   if (!presetFile.is_open()) {
     std::cerr << "Failed to open preset file: " << filePath << std::endl;
@@ -47,14 +48,18 @@ void parsePreset(ObjectFactory *factory, PhysicsSystem *physics, const char *fil
           std::cout << "Set G constant to: " << physics->G << std::endl;
         }
       }
-    } else if (line == "planet" || line == "sun") {
+    } else {
+      // Treat as planet name/texture ID or "sun"
       std::string type = line;
-      std::cout << "Parsing planet definition" << std::endl;
-      float posX, posY, posZ, radius, mass, velX, velY, velZ, colorR, colorG,
-          colorB;
+      if (type.empty())
+        continue;
+
+      std::cout << "Parsing object definition: " << type << std::endl;
+      float posX = 0, posY = 0, posZ = 0, radius = 1, mass = 1, velX = 0,
+            velY = 0, velZ = 0, colorR = 1, colorG = 1, colorB = 1;
       while (std::getline(presetFile, line)) {
         if (line.empty())
-          break; // End of planet definition
+          break; // End of definition
 
         std::istringstream iss(line);
         std::string prefix;
@@ -72,13 +77,19 @@ void parsePreset(ObjectFactory *factory, PhysicsSystem *physics, const char *fil
           iss >> colorR >> colorG >> colorB;
         }
       }
-      if (type == "planet")
-        factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
-                             Vec3(velX, velY, velZ),
-                             Vec3(colorR, colorG, colorB));
-      else if (type == "sun")
+      if (type == "sun")
         factory->spawnSun(Vec3(posX, posY, posZ), radius, mass,
                           Vec3(velX, velY, velZ), Vec3(colorR, colorG, colorB));
+      else {
+        if (!ResourceManager::TextureExists(type)) {
+          std::cerr << "Texture for type '" << type
+                    << "' not found. Using default texture." << std::endl;
+          type = "solid"; // Fallback to a default texture
+        }
+        factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
+                             Vec3(velX, velY, velZ),
+                             Vec3(colorR, colorG, colorB), type);
+      }
     }
   }
 }
@@ -105,7 +116,15 @@ void Engine::Init() {
   // load textures
   std::cout << "Loading Textures" << std::endl;
   ResourceManager::LoadTexture("../textures/plain.png", false, "solid");
-  ResourceManager::LoadTexture("../textures/earth.png", false, "earth");
+  ResourceManager::LoadTexture("../textures/sun.jpg", false, "sun");
+  ResourceManager::LoadTexture("../textures/earth.jpg", false, "earth");
+  ResourceManager::LoadTexture("../textures/mercury.jpg", false, "mercury");
+  ResourceManager::LoadTexture("../textures/venus.jpg", false, "venus");
+  ResourceManager::LoadTexture("../textures/mars.jpg", false, "mars");
+  ResourceManager::LoadTexture("../textures/jupiter.jpg", false, "jupiter");
+  ResourceManager::LoadTexture("../textures/saturn.jpg", false, "saturn");
+  ResourceManager::LoadTexture("../textures/uranus.jpg", false, "uranus");
+  ResourceManager::LoadTexture("../textures/neptune.jpg", false, "neptune");
 
   // load models
   std::cout << "Loading Models" << std::endl;
@@ -115,7 +134,8 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  parsePreset(this->objectFactory, &this->physics, "../presets/solar_system.txt");
+  parsePreset(this->objectFactory, &this->physics,
+              "../presets/solar_system.txt");
 
   std::cout << "Creating GUI" << std::endl;
   // To be implemented later

@@ -25,13 +25,14 @@ void setupTrailRenderer(Object &obj) {
 }
 
 ObjectID ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
-                                    Vec3 initialSpeed, Vec3 color) {
+                                    Vec3 initialSpeed, Vec3 color,
+                                    std::string textureID) {
   ObjectID objID = this->world->CreateObject();
   Object &obj = this->world->objects[objID];
 
   Sprite sprite = Sprite();
   sprite.modelID = "sphere";
-  sprite.textureID = "earth";
+  sprite.textureID = textureID;
   sprite.shaderID = "diffuse";
   sprite.color = color;
   obj.spriteID = this->world->AddSprite(sprite);
@@ -60,7 +61,7 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
 
   Sprite sprite = Sprite();
   sprite.modelID = "sphere";
-  sprite.textureID = "solid";
+  sprite.textureID = "sun";
   sprite.shaderID = "sun";
   sprite.color = color;
   obj.spriteID = this->world->AddSprite(sprite);
