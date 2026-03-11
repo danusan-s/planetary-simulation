@@ -6,9 +6,13 @@
 ![GLFW](https://img.shields.io/badge/GLFW-3.3-20232A)
 ![Status](https://img.shields.io/badge/Project-Learning%20Project-6C8E5E)
 
-A real-time 3D planetary simulation built with C++ and OpenGL. The project combines a simple N-body gravity system with textured planet rendering, orbital trails, a skybox, and free-camera exploration.
+A real-time 3D planetary simulation engine built with C++ and OpenGL. The project combines a simple N-body gravity system with textured planet rendering, orbital trails, a skybox, and free-camera exploration.
 
 ## Screenshots and GIFs
+
+Photos are taken from the default `solar_system.txt` preset, which aims to mimic our own solar system. 
+Distances are scaled down by 1e10, masses are scaled to units of Earth masses. G is set to 0.00174 and orbital velocities are computed upon these values.
+For better visibility, the radius of the sun and planets are scaled up (non uniformly).
 
 ![Main Scene](docs/main_scene.png)
 *Full solar system view with lighting, a skybox, and orbital trails.*
