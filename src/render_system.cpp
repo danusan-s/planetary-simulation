@@ -46,6 +46,8 @@ void RenderSystem::renderWorld(World *world, float alpha) {
     trailShader.SetMatrix4("view", world->camera.GetViewMatrix());
     trailShader.SetMatrix4("projection", world->camera.GetProjectionMatrix());
     trailShader.SetVector3f("trailColor", color * 2.0f);
+    trailShader.SetInteger("trailHead", obj.trailHead);
+    trailShader.SetInteger("maxTrail", MAX_TRAIL);
 
     glBindVertexArray(obj.trailVAO);
     int start = (obj.trailHead + 1) % MAX_TRAIL;

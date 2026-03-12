@@ -2,10 +2,11 @@
 
 uniform vec3 trailColor;
 
+in float vAlpha;
 out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(trailColor, 1.0);
+    FragColor = vec4(trailColor, vAlpha);
 }
 

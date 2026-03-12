@@ -12,8 +12,14 @@ Cubemap::Cubemap()
 void Cubemap::Generate(std::vector<unsigned int> width,
                        std::vector<unsigned int> height,
                        std::vector<unsigned char *> data) {
-  this->Width = width;
-  this->Height = height;
+  assert(data.size() == 6); // Ensure we have 6 images for the cubemap
+  this->Width = width[0];
+  this->Height = height[0];
+  // Ensure all faces have the same dimensions
+  for (int i = 1; i < 6; i++) {
+    assert(width[i] == this->Width && height[i] == this->Height);
+  }
+
   // create Texture
   // Bind the texture
   glBindTexture(GL_TEXTURE_CUBE_MAP, this->ID);
@@ -24,8 +30,6 @@ void Cubemap::Generate(std::vector<unsigned int> width,
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, this->Wrap_R);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, this->Filter_Min);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, this->Filter_Max);
-
-  assert(data.size() == 6); // Ensure we have 6 images for the cubemap
 
   for (unsigned int i = 0; i < 6; i++) {
     glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0,

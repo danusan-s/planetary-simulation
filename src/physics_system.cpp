@@ -55,7 +55,7 @@ void PhysicsSystem::step(World *world, float dt) {
 
     // Inverse relationship:
     // Higher speed -> lower sample rate (more frequent sampling)
-    int dynamicSampleRate = static_cast<int>(30.0f / speed);
+    int dynamicSampleRate = static_cast<int>(20.0f / speed);
 
     if (dynamicSampleRate < 1)
       dynamicSampleRate = 1;
