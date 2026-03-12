@@ -100,12 +100,11 @@ void Engine::Init() {
   std::cout << "Creating Objects" << std::endl;
 
   // To use presets:
-  this->physics->G = this->objectFactory->parsePreset(
-      Utils::GetAssetPath("presets/two_bodies.txt").c_str());
+  // this->physics->G = this->objectFactory->parsePreset(
+  //     Utils::GetAssetPath("presets/collisions.txt").c_str());
 
   // To use random generation:
-  // this->objectFactory->generateRandomPlanets(20); // Generates 20 random
-  // planets
+  this->objectFactory->generateRandomPlanets(20);
 
   // std::cout << "Creating GUI" << std::endl;
   // To be implemented later

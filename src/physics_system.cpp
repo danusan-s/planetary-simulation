@@ -31,6 +31,28 @@ void PhysicsSystem::step(World *world, float dt) {
       Vec3 delta = objB.transform.position - objA.transform.position;
 
       float dist_sq = delta.dot(delta) + epsilon;
+      float dist = std::sqrt(dist_sq);
+
+      if (dist < (objA.transform.radius + objB.transform.radius)) {
+        if (bodyA.mass >= bodyB.mass) {
+          bodyA.velocity =
+              (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
+              (bodyA.mass + bodyB.mass);
+          bodyA.mass += bodyB.mass;
+          objB.bodyID = INVALID_ID;
+          objB.spriteID = INVALID_ID;
+        } else {
+          bodyB.velocity =
+              (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
+              (bodyA.mass + bodyB.mass);
+          bodyB.mass += bodyA.mass;
+          objA.bodyID = INVALID_ID;
+          objA.spriteID = INVALID_ID;
+          break; // objA is destroyed, stop checking it against other objects
+        }
+        continue;
+      }
+
       Vec3 direction = delta.normalized();
 
       bodyA.velocity += direction * (G * bodyB.mass / dist_sq) * dt;

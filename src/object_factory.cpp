@@ -3,8 +3,8 @@
 #include "resource_manager.h"
 #include "types.h"
 #include <cmath>
-#include <cstdlib>
 #include <fstream>
+#include <random>
 #include <sstream>
 
 ObjectFactory::ObjectFactory(World *world) {
@@ -30,13 +30,17 @@ void setupTrailRenderer(Object &obj) {
 }
 
 float randomFloat(float min, float max) {
-  return min + static_cast<float>(rand()) /
-                   (static_cast<float>(RAND_MAX / (max - min)));
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dis(min, max);
+  return dis(gen);
 }
 
 void ObjectFactory::generateRandomPlanets(int n) {
+  spawnSun(Vec3(0.0f), 2.0f, 50000.0f, Vec3(10.0f, 0.0f, 0.0f),
+           Vec3(1.0f, 1.0f, 0.5f));
   for (int i = 0; i < n; ++i) {
-    float mass = randomFloat(1.0f, 1000.0f);
+    float mass = randomFloat(1.0f, 100.0f);
     // Simple heuristic for radius: r ~ cbrt(mass)
     float radius = std::cbrt(mass) * 0.2f;
 
@@ -48,7 +52,7 @@ void ObjectFactory::generateRandomPlanets(int n) {
 
     float vlen = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y +
                            velocity.z * velocity.z);
-    float velMag = randomFloat(0.0f, 10.0f);
+    float velMag = randomFloat(0.0f, 5.0f);
     if (vlen > 0.0f) {
       velocity.x = (velocity.x / vlen) * velMag;
       velocity.y = (velocity.y / vlen) * velMag;

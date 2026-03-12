@@ -1,0 +1,23 @@
+constants
+G 1.0
+
+planet
+pos 0 0 30 
+radius 0.4
+mass 100
+vel 0 0 -10 
+color 1 1 0.7 
+
+planet
+pos 0 0 10 
+radius 0.4
+mass 100
+vel 0 0 -10 
+color 1 1 0.7 
+
+planet
+pos 0 0 -30
+radius 0.4 
+mass 1000
+vel 0 0 0 
+color 1 0.7 1 
