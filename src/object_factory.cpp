@@ -1,6 +1,11 @@
 #include "object_factory.h"
 #include "camera.h"
+#include "resource_manager.h"
 #include "types.h"
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
 
 ObjectFactory::ObjectFactory(World *world) {
   this->world = world;
@@ -22,6 +27,115 @@ void setupTrailRenderer(Object &obj) {
   glEnableVertexAttribArray(0);
 
   glBindVertexArray(0);
+}
+
+float randomFloat(float min, float max) {
+  return min + static_cast<float>(rand()) /
+                   (static_cast<float>(RAND_MAX / (max - min)));
+}
+
+void ObjectFactory::generateRandomPlanets(int n) {
+  for (int i = 0; i < n; ++i) {
+    float mass = randomFloat(1.0f, 1000.0f);
+    // Simple heuristic for radius: r ~ cbrt(mass)
+    float radius = std::cbrt(mass) * 0.2f;
+
+    Vec3 position(randomFloat(-100.0f, 100.0f), randomFloat(-100.0f, 100.0f),
+                  randomFloat(-100.0f, 100.0f));
+
+    Vec3 velocity(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
+                  randomFloat(-1.0f, 1.0f));
+
+    float vlen = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y +
+                           velocity.z * velocity.z);
+    float velMag = randomFloat(0.0f, 10.0f);
+    if (vlen > 0.0f) {
+      velocity.x = (velocity.x / vlen) * velMag;
+      velocity.y = (velocity.y / vlen) * velMag;
+      velocity.z = (velocity.z / vlen) * velMag;
+    }
+
+    // Bright colors
+    Vec3 color(randomFloat(0.5f, 1.0f), randomFloat(0.5f, 1.0f),
+               randomFloat(0.5f, 1.0f));
+
+    spawnPlanet(position, radius, mass, velocity, color, "solid");
+  }
+}
+
+float ObjectFactory::parsePreset(const char *filePath) {
+  float G = 1.0f; // Default gravitational constant
+
+  std::ifstream presetFile(filePath);
+  if (!presetFile.is_open()) {
+    std::cerr << "Failed to open preset file: " << filePath << std::endl;
+    return G;
+  }
+
+  std::cout << "Parsing preset file: " << filePath << std::endl;
+
+  std::string line;
+  while (std::getline(presetFile, line)) {
+    std::cout << "Read line: " << line << std::endl;
+    if (line == "constants") {
+      std::cout << "Parsing constants" << std::endl;
+      while (std::getline(presetFile, line)) {
+        if (line.empty())
+          break; // End of constants definition
+
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
+
+        if (prefix == "G") {
+          iss >> G;
+          std::cout << "Set G constant to: " << G << std::endl;
+        }
+      }
+    } else {
+      // Treat as planet name/texture ID or "sun"
+      std::string type = line;
+      if (type.empty())
+        continue;
+
+      std::cout << "Parsing object definition: " << type << std::endl;
+      float posX = 0, posY = 0, posZ = 0, radius = 1, mass = 1, velX = 0,
+            velY = 0, velZ = 0, colorR = 1, colorG = 1, colorB = 1;
+      while (std::getline(presetFile, line)) {
+        if (line.empty())
+          break; // End of definition
+
+        std::istringstream iss(line);
+        std::string prefix;
+        iss >> prefix;
+
+        if (prefix == "pos") {
+          iss >> posX >> posY >> posZ;
+        } else if (prefix == "radius") {
+          iss >> radius;
+        } else if (prefix == "mass") {
+          iss >> mass;
+        } else if (prefix == "vel") {
+          iss >> velX >> velY >> velZ;
+        } else if (prefix == "color") {
+          iss >> colorR >> colorG >> colorB;
+        }
+      }
+      if (type == "sun")
+        spawnSun(Vec3(posX, posY, posZ), radius, mass, Vec3(velX, velY, velZ),
+                 Vec3(colorR, colorG, colorB));
+      else {
+        if (!ResourceManager::TextureExists(type)) {
+          std::cerr << "Texture for type '" << type
+                    << "' not found. Using default texture." << std::endl;
+          type = "solid"; // Fallback to a default texture
+        }
+        spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
+                    Vec3(velX, velY, velZ), Vec3(colorR, colorG, colorB), type);
+      }
+    }
+  }
+  return G;
 }
 
 ObjectID ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,

@@ -3,7 +3,6 @@
 
 #include <glad/glad.h>
 
-#include "camera.h"
 #include "object_factory.h"
 #include "physics_system.h"
 #include "render_system.h"

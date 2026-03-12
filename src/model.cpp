@@ -1,5 +1,7 @@
 #include "model.h"
+#include <array>
 #include <iostream>
+#include <sstream>
 
 Model::Model() {
 }

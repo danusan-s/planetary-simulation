@@ -7,7 +7,7 @@
 
 // Defines several possible options for camera movement. Used as abstraction to
 // stay away from window-system specific input methods
-enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT };
+enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
 // Default camera values
 const float YAW = -90.0f;
@@ -15,6 +15,7 @@ const float PITCH = 0.0f;
 const float MIN_SPEED = 5.0f;
 const float MAX_SPEED = 100.0f;
 const float ACCELERATION = 30.0f;
+const float VERTICAL_SPEED = 10.0f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 const float ASPECT_RATIO = 16.0f / 9.0f;
@@ -39,6 +40,7 @@ public:
   float MinSpeed;
   float MaxSpeed;
   float Acceleration;
+  float VerticalSpeed;
   float MouseSensitivity;
   float Zoom;
   float aspectRatio;
@@ -51,8 +53,9 @@ public:
          float pitch = PITCH)
       : Front(glm::vec3(0.0f, 0.0f, -1.0f)), CurrentSpeed(MIN_SPEED),
         MinSpeed(MIN_SPEED), MaxSpeed(MAX_SPEED), Acceleration(ACCELERATION),
-        MouseSensitivity(SENSITIVITY), Zoom(ZOOM), aspectRatio(ASPECT_RATIO),
-        nearPlane(NEAR_PLANE), farPlane(FAR_PLANE) {
+        VerticalSpeed(VERTICAL_SPEED), MouseSensitivity(SENSITIVITY),
+        Zoom(ZOOM), aspectRatio(ASPECT_RATIO), nearPlane(NEAR_PLANE),
+        farPlane(FAR_PLANE) {
     Position = position;
     WorldUp = up;
     Yaw = yaw;
@@ -99,6 +102,7 @@ public:
   // systems)
   void ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = CurrentSpeed * deltaTime;
+    float verticalVelocity = VerticalSpeed * deltaTime;
     if (direction == FORWARD)
       Position += Front * velocity;
     if (direction == BACKWARD)
@@ -107,6 +111,10 @@ public:
       Position -= Right * velocity;
     if (direction == RIGHT)
       Position += Right * velocity;
+    if (direction == UP)
+      Position += glm::vec3(0.0f, 1.0f, 0.0f) * verticalVelocity;
+    if (direction == DOWN)
+      Position -= glm::vec3(0.0f, 1.0f, 0.0f) * verticalVelocity;
   }
 
   // processes input received from a mouse input system. Expects the offset

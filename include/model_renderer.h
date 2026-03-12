@@ -16,6 +16,9 @@ public:
                    const Model &model, const Texture2D &texture,
                    const Shader &shader, const glm::vec3 &color,
                    const glm::vec3 &lightPos, const glm::vec3 &lightColor);
+
+  void renderTrail(Camera &camera, const Shader &shader, int trailHead,
+                   GLuint trailVAO, const glm::vec3 &color);
 };
 
 #endif // !MODEL_RENDERER_H

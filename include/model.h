@@ -1,9 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <array>
 #include <glad/glad.h>
-#include <sstream>
 #include <string>
 #include <vector>
 

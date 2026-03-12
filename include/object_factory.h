@@ -9,6 +9,8 @@ private:
 
 public:
   ObjectFactory(World *world);
+  void generateRandomPlanets(int n);
+  float parsePreset(const char *filePath);
   ObjectID spawnPlanet(Vec3 position, float radius, float mass,
                        Vec3 initialSpeed, Vec3 color, std::string textureID);
   ObjectID spawnSun(Vec3 position, float radius, float mass, Vec3 initialSpeed,

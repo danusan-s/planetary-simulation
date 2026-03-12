@@ -3,7 +3,6 @@
 #include "resource_manager.h"
 #include "utils.h"
 #include <GLFW/glfw3.h>
-#include <fstream>
 #include <iostream>
 
 Engine::Engine() {
@@ -31,84 +30,7 @@ Engine::~Engine() {
   std::cout << "Game Object successfully deleted" << std::endl;
 }
 
-void parsePreset(ObjectFactory *factory, PhysicsSystem *physics,
-                 const char *filePath) {
-  std::ifstream presetFile(filePath);
-  if (!presetFile.is_open()) {
-    std::cerr << "Failed to open preset file: " << filePath << std::endl;
-    return;
-  }
-
-  std::cout << "Parsing preset file: " << filePath << std::endl;
-
-  std::string line;
-  while (std::getline(presetFile, line)) {
-    std::cout << "Read line: " << line << std::endl;
-    if (line == "constants") {
-      std::cout << "Parsing constants" << std::endl;
-      while (std::getline(presetFile, line)) {
-        if (line.empty())
-          break; // End of constants definition
-
-        std::istringstream iss(line);
-        std::string prefix;
-        iss >> prefix;
-
-        if (prefix == "G") {
-          iss >> physics->G;
-          std::cout << "Set G constant to: " << physics->G << std::endl;
-        }
-      }
-    } else {
-      // Treat as planet name/texture ID or "sun"
-      std::string type = line;
-      if (type.empty())
-        continue;
-
-      std::cout << "Parsing object definition: " << type << std::endl;
-      float posX = 0, posY = 0, posZ = 0, radius = 1, mass = 1, velX = 0,
-            velY = 0, velZ = 0, colorR = 1, colorG = 1, colorB = 1;
-      while (std::getline(presetFile, line)) {
-        if (line.empty())
-          break; // End of definition
-
-        std::istringstream iss(line);
-        std::string prefix;
-        iss >> prefix;
-
-        if (prefix == "pos") {
-          iss >> posX >> posY >> posZ;
-        } else if (prefix == "radius") {
-          iss >> radius;
-        } else if (prefix == "mass") {
-          iss >> mass;
-        } else if (prefix == "vel") {
-          iss >> velX >> velY >> velZ;
-        } else if (prefix == "color") {
-          iss >> colorR >> colorG >> colorB;
-        }
-      }
-      if (type == "sun")
-        factory->spawnSun(Vec3(posX, posY, posZ), radius, mass,
-                          Vec3(velX, velY, velZ), Vec3(colorR, colorG, colorB));
-      else {
-        if (!ResourceManager::TextureExists(type)) {
-          std::cerr << "Texture for type '" << type
-                    << "' not found. Using default texture." << std::endl;
-          type = "solid"; // Fallback to a default texture
-        }
-        factory->spawnPlanet(Vec3(posX, posY, posZ), radius, mass,
-                             Vec3(velX, velY, velZ),
-                             Vec3(colorR, colorG, colorB), type);
-      }
-    }
-  }
-}
-
 void Engine::Init() {
-  // Seed the random number generator
-  srand(static_cast<unsigned int>(time(0)));
-
   // load shaders
   std::cout << ">> Loading Shaders" << std::endl;
   ResourceManager::LoadShader(
@@ -176,8 +98,14 @@ void Engine::Init() {
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
-  parsePreset(this->objectFactory, this->physics,
-              Utils::GetAssetPath("presets/solar_system.txt").c_str());
+
+  // To use presets:
+  this->physics->G = this->objectFactory->parsePreset(
+      Utils::GetAssetPath("presets/two_bodies.txt").c_str());
+
+  // To use random generation:
+  // this->objectFactory->generateRandomPlanets(20); // Generates 20 random
+  // planets
 
   // std::cout << "Creating GUI" << std::endl;
   // To be implemented later
@@ -191,7 +119,7 @@ void Engine::ProcessInput(float deltaTime) {
   if (this->inputState.keys[GLFW_KEY_ESCAPE]) {
     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
   }
-  if (this->inputState.keys[GLFW_KEY_LEFT_CONTROL]) {
+  if (this->inputState.keys[GLFW_KEY_CAPS_LOCK]) {
     glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     for (auto &widget : this->world->widgets) {
       widget.update(this->inputState);
@@ -223,6 +151,14 @@ void Engine::ProcessInput(float deltaTime) {
       this->world->camera.ProcessKeyboard(RIGHT, deltaTime);
       isMoving = true;
     }
+    if (this->inputState.keys[GLFW_KEY_SPACE]) {
+      this->world->camera.ProcessKeyboard(UP, deltaTime);
+      isMoving = true;
+    }
+    if (this->inputState.keys[GLFW_KEY_LEFT_CONTROL]) {
+      this->world->camera.ProcessKeyboard(DOWN, deltaTime);
+      isMoving = true;
+    }
 
     this->world->camera.UpdateSpeed(isMoving, deltaTime);
   }
@@ -232,6 +168,5 @@ void Engine::ProcessInput(float deltaTime) {
 }
 
 void Engine::Render(float alpha) {
-  this->renderer->renderWorld(this->world, alpha);
-  this->renderer->renderGUI(this->world, this->viewport);
+  this->renderer->renderWorld(this->world, this->viewport, alpha);
 }

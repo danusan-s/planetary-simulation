@@ -11,7 +11,9 @@ public:
   RenderSystem();
   ~RenderSystem();
 
-  void renderWorld(World *world, float alpha);
+  void renderWorld(World *world, Viewport &viewport, float alpha);
+  void renderSkybox(World *world);
+  void renderObjects(World *world, float alpha);
   void renderGUI(World *world, Viewport &viewport);
 
 private:

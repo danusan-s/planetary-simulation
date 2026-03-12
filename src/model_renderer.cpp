@@ -1,6 +1,7 @@
 #include "model_renderer.h"
 #include "camera.h"
 #include "texture.h"
+#include "types.h"
 #include <glm/ext/matrix_float4x4.hpp>
 
 ModelRenderer::ModelRenderer() {
@@ -34,4 +35,21 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
   glBindVertexArray(model.VAO);
   glDrawElements(GL_TRIANGLES, model.indices.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+}
+
+void ModelRenderer::renderTrail(Camera &camera, const Shader &shader,
+                                int trailHead, GLuint trailVAO,
+                                const glm::vec3 &color) {
+  shader.Use();
+  shader.SetMatrix4("view", camera.GetViewMatrix());
+  shader.SetMatrix4("projection", camera.GetProjectionMatrix());
+  shader.SetVector3f("trailColor", color);
+  shader.SetInteger("trailHead", trailHead);
+  shader.SetInteger("maxTrail", MAX_TRAIL);
+
+  glBindVertexArray(trailVAO);
+  int start = (trailHead + 1) % MAX_TRAIL;
+
+  glDrawArrays(GL_LINE_STRIP, start, MAX_TRAIL - start);
+  glDrawArrays(GL_LINE_STRIP, 0, start);
 }
