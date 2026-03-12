@@ -140,7 +140,7 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha) {
   std::cout << "Loading texture file: " << file << std::endl;
   // load image
   int width, height, nrChannels;
-  unsigned char *data = stbi_load(file, &width, &height, &nrChannels, 0);
+  unsigned char *data = stbi_load(file, &width, &height, &nrChannels, alpha ? 4 : 3);
   // now generate texture
   // Error in generating ?
   texture.Generate(width, height, data);
@@ -165,7 +165,7 @@ Cubemap ResourceManager::loadCubemapFromFile(std::vector<const char *> file,
     // load image
     int width, height, nrChannels = 0;
     stbi_set_flip_vertically_on_load(false);
-    unsigned char *data = stbi_load(f, &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(f, &width, &height, &nrChannels, alpha ? 4 : 3);
     if (data == nullptr) {
       std::cerr << "Failed to load cubemap face: " << f << std::endl;
       continue;
