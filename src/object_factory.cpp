@@ -4,6 +4,7 @@
 #include "types.h"
 #include <cmath>
 #include <fstream>
+#include <iostream>
 #include <random>
 #include <sstream>
 
@@ -198,18 +199,4 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
   setupTrailRenderer(obj);
 
   return objID;
-}
-
-void ObjectFactory::spawnButton(float x, float y, float width, float height,
-                                const std::string &label,
-                                std::function<void()> onClick) {
-  Button button;
-  button.x = x;
-  button.y = y;
-  button.width = width;
-  button.height = height;
-  button.label = label;
-  button.onClick = onClick;
-
-  this->world->widgets.push_back(button);
 }

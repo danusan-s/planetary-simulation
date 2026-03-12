@@ -3,7 +3,7 @@ G 0.00174
 
 sun
 pos 0 0 0
-radius 2.0
+radius 1.0
 mass 332943
 vel 0 0 0
 color 1 1 0.7

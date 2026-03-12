@@ -57,7 +57,7 @@ void Engine::Init() {
   // load textures
   std::cout << ">> Loading Textures" << std::endl;
   ResourceManager::LoadTexture(
-      Utils::GetAssetPath("textures/plain.png").c_str(), false, "solid");
+      Utils::GetAssetPath("textures/white.png").c_str(), false, "solid");
   ResourceManager::LoadTexture(Utils::GetAssetPath("textures/sun.jpg").c_str(),
                                false, "sun");
   ResourceManager::LoadTexture(
@@ -100,14 +100,11 @@ void Engine::Init() {
   std::cout << "Creating Objects" << std::endl;
 
   // To use presets:
-  // this->physics->G = this->objectFactory->parsePreset(
-  //     Utils::GetAssetPath("presets/collisions.txt").c_str());
+  this->physics->G = this->objectFactory->parsePreset(
+      Utils::GetAssetPath("presets/three_bodies.txt").c_str());
 
   // To use random generation:
-  this->objectFactory->generateRandomPlanets(20);
-
-  // std::cout << "Creating GUI" << std::endl;
-  // To be implemented later
+  // this->objectFactory->generateRandomPlanets(20);
 }
 
 void Engine::Update(float timeStep) {
@@ -120,9 +117,6 @@ void Engine::ProcessInput(float deltaTime) {
   }
   if (this->inputState.keys[GLFW_KEY_CAPS_LOCK]) {
     glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    for (auto &widget : this->world->widgets) {
-      widget.update(this->inputState);
-    }
   } else {
     glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR,
                      GLFW_CURSOR_DISABLED);
@@ -167,5 +161,5 @@ void Engine::ProcessInput(float deltaTime) {
 }
 
 void Engine::Render(float alpha) {
-  this->renderer->renderWorld(this->world, this->viewport, alpha);
+  this->renderer->renderWorld(this->world, alpha);
 }

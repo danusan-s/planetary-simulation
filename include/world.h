@@ -3,7 +3,6 @@
 
 #include "camera.h"
 #include "types.h"
-#include "widgets.h"
 #include <vector>
 
 class World {
@@ -13,7 +12,6 @@ public:
   std::vector<Object> objects;
   std::vector<Sprite> sprites;
   std::vector<Body> bodies;
-  std::vector<Widget> widgets;
   SunID sunID; // Pointer to the sun object for easy access
 
   ObjectID CreateObject();

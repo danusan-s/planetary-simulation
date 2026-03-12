@@ -6,19 +6,16 @@
 RenderSystem::RenderSystem() {
   this->modelRenderer = new ModelRenderer();
   this->skyboxRenderer = new SkyboxRenderer();
-  this->widgetRenderer = new WidgetRenderer();
 }
 
 RenderSystem::~RenderSystem() {
   delete this->modelRenderer;
   delete this->skyboxRenderer;
-  delete this->widgetRenderer;
 }
 
-void RenderSystem::renderWorld(World *world, Viewport &viewport, float alpha) {
+void RenderSystem::renderWorld(World *world, float alpha) {
   renderSkybox(world);
   renderObjects(world, alpha);
-  renderGUI(world, viewport);
 }
 
 void RenderSystem::renderSkybox(World *world) {
@@ -59,15 +56,4 @@ void RenderSystem::renderObjects(World *world, float alpha) {
     this->modelRenderer->renderTrail(world->camera, trailShader, obj.trailHead,
                                      obj.trailVAO, color);
   }
-}
-
-void RenderSystem::renderGUI(World *world, Viewport &viewport) {
-  glDisable(GL_DEPTH_TEST);
-  for (const auto &widget : world->widgets) {
-    const Texture2D &texture = ResourceManager::GetTexture("solid");
-    const Shader &shader = ResourceManager::GetShader("debug");
-    this->widgetRenderer->renderWidget(widget, texture, shader, glm::vec3(1.0f),
-                                       viewport.width, viewport.height);
-  }
-  glEnable(GL_DEPTH_TEST);
 }
