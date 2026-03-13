@@ -9,29 +9,10 @@
 #include <chrono>
 #include <iostream>
 
-Engine::Engine() {
-  this->physics = nullptr;
-  this->renderer = nullptr;
-  this->objectFactory = nullptr;
-}
+Engine::Engine() = default;
 
 Engine::~Engine() {
-  std::cout << "Attempting to delete Engine Object" << std::endl;
-
-  if (this->physics) {
-    std::cout << "Deleting Physics System" << std::endl;
-    delete this->physics;
-  }
-  if (this->renderer) {
-    std::cout << "Deleting Render System" << std::endl;
-    delete this->renderer;
-  }
-  if (this->objectFactory) {
-    std::cout << "Deleting Object Factory" << std::endl;
-    delete this->objectFactory;
-  }
-
-  std::cout << "Engine Object successfully deleted" << std::endl;
+  std::cout << "Engine destroyed" << std::endl;
 }
 
 void Engine::Shutdown() {
@@ -68,10 +49,10 @@ void Engine::Init() {
       Utils::GetAssetPath("shaders/skybox.vert").c_str(),
       Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
 
-  this->physics = new PhysicsSystem();
-  this->world = new World();
-  this->renderer = new RenderSystem();
-  this->objectFactory = new ObjectFactory(this->world);
+  this->physics = std::make_unique<PhysicsSystem>();
+  this->world = std::make_unique<World>();
+  this->renderer = std::make_unique<RenderSystem>();
+  this->objectFactory = std::make_unique<ObjectFactory>(this->world.get());
 
   // load textures
   std::cout << ">> Loading Textures" << std::endl;
@@ -137,7 +118,7 @@ void Engine::Init() {
 }
 
 void Engine::Update(float timeStep) {
-  this->physics->step(this->world, timeStep, this->objectFactory);
+  this->physics->step(this->world.get(), timeStep, this->objectFactory.get());
 }
 
 void Engine::ProcessInput(float deltaTime) {
@@ -214,7 +195,7 @@ void Engine::Render(float alpha) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
-  this->renderer->renderWorld(this->world, alpha);
+  this->renderer->renderWorld(this->world.get(), alpha);
 
   ImGui::Begin("Debug Info");
   ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);

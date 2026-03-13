@@ -3,15 +3,11 @@
 #include "resource_manager.h"
 #include <glm/ext/matrix_float4x4.hpp>
 
-RenderSystem::RenderSystem() {
-  this->modelRenderer = new ModelRenderer();
-  this->skyboxRenderer = new SkyboxRenderer();
-}
+RenderSystem::RenderSystem()
+    : modelRenderer(std::make_unique<ModelRenderer>()),
+      skyboxRenderer(std::make_unique<SkyboxRenderer>()) {}
 
-RenderSystem::~RenderSystem() {
-  delete this->modelRenderer;
-  delete this->skyboxRenderer;
-}
+RenderSystem::~RenderSystem() = default;
 
 void RenderSystem::renderWorld(World *world, float alpha) {
   renderSkybox(world);

@@ -10,18 +10,18 @@
 #include "types.h"
 #include "world.h"
 #include <GLFW/glfw3.h>
+#include <memory>
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
 // easy access to each of the components and manageability.
 class Engine {
 private:
-  PhysicsSystem *physics;
-  // Init render related stuff later as it needs OpenGL context
-  RenderSystem *renderer;
-  ObjectFactory *objectFactory;
-  World *world;
-  ImGuiIO *guiIO;
+  std::unique_ptr<World> world;
+  std::unique_ptr<PhysicsSystem> physics;
+  std::unique_ptr<RenderSystem> renderer;
+  std::unique_ptr<ObjectFactory> objectFactory;
+  ImGuiIO *guiIO = nullptr;
 
 public:
   // game state

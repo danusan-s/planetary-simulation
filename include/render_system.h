@@ -4,6 +4,7 @@
 #include "model_renderer.h"
 #include "skybox_renderer.h"
 #include "world.h"
+#include <memory>
 
 class RenderSystem {
 public:
@@ -17,8 +18,8 @@ public:
   void renderParticles(World *world);
 
 private:
-  ModelRenderer *modelRenderer;
-  SkyboxRenderer *skyboxRenderer;
+  std::unique_ptr<ModelRenderer> modelRenderer;
+  std::unique_ptr<SkyboxRenderer> skyboxRenderer;
 };
 
 #endif // !RENDER_SYSTEM_H
