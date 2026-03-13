@@ -55,17 +55,18 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
       float dist_sq = delta.dot(delta) + GRAVITY_EPSILON;
       float dist = std::sqrt(dist_sq);
 
-      if (dist < (objA.transform.radius + objB.transform.radius)) {
+      if (dist < (bodyA.radius + bodyB.radius)) {
         // Volume is conserved so r1^3 + r2^3 = R^3
-        float newRadius = std::cbrt(std::pow(objA.transform.radius, 3) +
-                                    std::pow(objB.transform.radius, 3));
+        float newRadius = std::cbrt(std::pow(bodyA.radius, 3) +
+                                    std::pow(bodyB.radius, 3));
         Vec3 normal = delta.normalized();
         if (bodyA.mass >= bodyB.mass) {
           bodyA.velocity =
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyA.mass += bodyB.mass;
-          objA.transform.radius = newRadius;
+          bodyA.radius = newRadius;
+          objA.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objA.transform.position + normal * newRadius,
                                   normal, objB, EXPLOSION_PARTICLE_COUNT);
           objB.destroyObj();
@@ -76,7 +77,8 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyB.mass += bodyA.mass;
-          objB.transform.radius = newRadius;
+          bodyB.radius = newRadius;
+          objB.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objB.transform.position + normal * newRadius,
                                   normal, objA, EXPLOSION_PARTICLE_COUNT);
           objA.destroyObj();
@@ -104,11 +106,11 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
           continue;
 
         const Body &body = world->bodies[obj.bodyID];
-        Vec3 delta = obj.transform.position - particle.position;
+        Vec3 delta = obj.transform.position - particle.transform.position;
         float dist_sq = delta.dot(delta) + GRAVITY_EPSILON;
         float dist = std::sqrt(dist_sq);
 
-        if (dist < obj.transform.radius) {
+        if (dist < body.radius) {
           particle.active = false;
           break;
         }
@@ -121,7 +123,7 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
         continue;
     }
 
-    particle.position += particle.velocity * dt;
+    particle.transform.position += particle.velocity * dt;
     particle.elapsedTime += dt;
     if (particle.lifetime - particle.elapsedTime <= 0.0f) {
       particle.active = false;

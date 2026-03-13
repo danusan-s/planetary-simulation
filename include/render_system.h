@@ -4,6 +4,7 @@
 #include "model_renderer.h"
 #include "skybox_renderer.h"
 #include "world.h"
+#include <glm/glm.hpp>
 #include <memory>
 
 class RenderSystem {
@@ -22,6 +23,11 @@ private:
 
   // Returns the light position and color from the sun, or defaults if no sun.
   void getSunLight(World *world, Vec3 &outPos, Vec3 &outColor);
+
+  // Builds a scale+rotation matrix that stretches baseScale along velocity.
+  // refSpeed controls how quickly the stretch saturates (reach max at 1x refSpeed).
+  static glm::mat4 velocityStretchMatrix(glm::vec3 baseScale, Vec3 velocity,
+                                         float refSpeed);
 };
 
 #endif // !RENDER_SYSTEM_H

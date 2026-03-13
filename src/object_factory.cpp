@@ -51,8 +51,8 @@ void ObjectFactory::generateRandomPlanet() {
                 randomFloat(-this->velocityRange, this->velocityRange));
 
   // Bright colors
-  Vec3 color(randomFloat(0.5f, 1.0f), randomFloat(0.5f, 1.0f),
-             randomFloat(0.5f, 1.0f));
+  Vec3 color(randomFloat(0.3f, 1.0f), randomFloat(0.3f, 1.0f),
+             randomFloat(0.3f, 1.0f));
 
   spawnPlanet(position, radius, mass, velocity, color, "solid");
 }
@@ -155,11 +155,11 @@ ObjectID ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
 
   Body body = Body();
   body.mass = mass;
+  body.radius = radius;
   body.velocity = initialSpeed;
   obj.bodyID = this->world->AddBody(body);
 
   obj.transform.position = position;
-  obj.transform.radius = radius;
   for (int i = 0; i < MAX_TRAIL; i++) {
     obj.trail[i] = position;
   }
@@ -184,11 +184,11 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
 
   Body body = Body();
   body.mass = mass;
+  body.radius = radius;
   body.velocity = initialSpeed;
   obj.bodyID = this->world->AddBody(body);
 
   obj.transform.position = position;
-  obj.transform.radius = radius;
   for (int i = 0; i < MAX_TRAIL; i++) {
     obj.trail[i] = position;
   }
@@ -202,11 +202,11 @@ ParticleID ObjectFactory::spawnParticle(Vec3 position, Vec3 velocity,
                                         float lifetime, float size,
                                         SpriteID spriteID) {
   Particle particle;
-  particle.position = position;
+  particle.transform.position = position;
+  particle.transform.scale = Vec3(size);
   particle.velocity = velocity;
   particle.elapsedTime = 0.0f;
   particle.lifetime = lifetime;
-  particle.size = size;
   particle.spriteID = spriteID;
   particle.active = true;
 
@@ -217,17 +217,17 @@ void ObjectFactory::spawnExplosion(Vec3 origin, Vec3 normal, Object &obj,
                                    int count) {
 
   Sprite explosionSprite;
-  explosionSprite.modelID = "cube";
+  explosionSprite.modelID = "debris";
   explosionSprite.textureID = "solid";
   explosionSprite.shaderID = "diffuse";
   explosionSprite.color = this->world->sprites[obj.spriteID]
                               .color; // Use the same color as the object
   SpriteID explosionSpriteID = this->world->AddSprite(explosionSprite);
 
-  float size = obj.transform.radius * 0.1f;
-  float lifetime = 5.0f;
-
   Body &body = this->world->bodies[obj.bodyID];
+  float size = body.radius * 0.3f;
+  float lifetime = 10.0f;
+
   Vec3 objVel = body.velocity;
   float speed = std::sqrt(objVel.x * objVel.x + objVel.y * objVel.y +
                           objVel.z * objVel.z);

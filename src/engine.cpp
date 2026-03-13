@@ -83,10 +83,12 @@ void Engine::loadModels() {
   std::cout << ">> Loading Models" << std::endl;
   ResourceManager::LoadModel(Utils::GetAssetPath("models/cube.obj").c_str(),
                              "cube");
+
   ResourceManager::LoadModel(
       Utils::GetAssetPath("models/sphere_smooth.obj").c_str(), "sphere");
-  ResourceManager::LoadModel(Utils::GetAssetPath("models/quad.obj").c_str(),
-                             "quad");
+
+  ResourceManager::LoadModel(
+      Utils::GetAssetPath("models/icosphere_low_smooth.obj").c_str(), "debris");
 }
 
 void Engine::initSystems() {

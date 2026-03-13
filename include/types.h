@@ -82,9 +82,9 @@ struct Vec3 {
 
 struct Transform {
   Vec3 position;
-  float radius;
+  Vec3 scale;
 
-  Transform() : position(Vec3(0.0f, 0.0f, 0.0f)), radius(1.0f) {
+  Transform() : position(Vec3(0.0f)), scale(Vec3(1.0f)) {
   }
 };
 
@@ -103,24 +103,24 @@ struct Sprite {
 struct Body {
   Vec3 velocity;
   float mass;
+  float radius; // Physics collision/gravity radius (independent of render scale)
 
-  Body() : velocity(Vec3()), mass(1.0f) {
+  Body() : velocity(Vec3()), mass(1.0f), radius(1.0f) {
   }
 };
 
 struct Particle {
-  Vec3 position;
+  Transform transform;
   Vec3 velocity;
   float lifetime;
   float elapsedTime;
-  float size;
   SpriteID spriteID;
 
   bool active;
 
   Particle()
-      : position(Vec3()), velocity(Vec3()), lifetime(0.0f), elapsedTime(0.0f),
-        size(1.0f), spriteID(INVALID_ID), active(false) {
+      : transform(Transform()), velocity(Vec3()), lifetime(0.0f),
+        elapsedTime(0.0f), spriteID(INVALID_ID), active(false) {
   }
 };
 

@@ -17,6 +17,9 @@ include_directories(include)
 # Add executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+# Enable GLM experimental extensions (required for gtx/quaternion etc.)
+target_compile_definitions(${PROJECT_NAME} PRIVATE GLM_ENABLE_EXPERIMENTAL)
+
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
     glfw
