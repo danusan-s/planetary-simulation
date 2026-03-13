@@ -12,7 +12,6 @@ uniform vec3 lightColor;
 
 uniform vec3 viewPos;
 uniform float rimPower    = 3.0; // Sharpness of the fresnel falloff
-uniform float rimStrength = 0.6; // Overall intensity of the rim glow
 
 out vec4 FragColor;
 
@@ -34,6 +33,8 @@ void main()
     vec3 result = (ambient + diffuse) * textureColor * objectColor;
 
     vec3 rimColor = normalize(objectColor + 0.0001); // Avoid division by zero
+    float brightness = dot(rimColor, vec3(0.2126, 0.7152, 0.0722));      // perceptual luminance of hue-normalized color
+    float rimStrength = mix(1.0, 0.2, brightness);                        // darker objects get stronger rim
     float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), rimPower) * rimStrength;
     result += rimColor * rim;
 
