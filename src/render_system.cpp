@@ -48,7 +48,13 @@ glm::mat4 RenderSystem::velocityStretchMatrix(glm::vec3 baseScale,
   return glm::toMat4(rot) * glm::scale(glm::mat4(1.0f), stretchedScale);
 }
 
+void RenderSystem::updateViewProjection(World *world) {
+  this->viewProj =
+      world->camera.GetProjectionMatrix() * world->camera.GetViewMatrix();
+}
+
 void RenderSystem::renderWorld(World *world) {
+  updateViewProjection(world);
   renderSkybox(world);
   renderObjects(world);
   renderParticles(world);
@@ -93,17 +99,18 @@ void RenderSystem::renderObjects(World *world) {
     modelMat =
         glm::scale(modelMat, static_cast<glm::vec3>(obj.transform.scale));
 
-    shader.SetFloat("seed", static_cast<float>(i), true);
+    shader.SetMatrix4("viewProj", this->viewProj, true);
 
     this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
                                      shader, color, lightPos, lightColor);
 
     const Shader &trailShader = ResourceManager::GetShader("trail");
+    trailShader.SetMatrix4("viewProj", this->viewProj, true);
     glBindBuffer(GL_ARRAY_BUFFER, obj.trailVBO);
     glBufferData(GL_ARRAY_BUFFER, MAX_TRAIL * sizeof(Vec3), obj.trail,
                  GL_DYNAMIC_DRAW);
-    this->modelRenderer->renderTrail(world->camera, trailShader, obj.trailHead,
-                                     obj.trailVAO, color);
+    this->modelRenderer->renderTrail(trailShader, obj.trailHead, obj.trailVAO,
+                                     color);
   }
 }
 
@@ -128,6 +135,8 @@ void RenderSystem::renderParticles(World *world) {
     modelMat *=
         velocityStretchMatrix(static_cast<glm::vec3>(particle.transform.scale),
                               particle.velocity, PARTICLE_STRETCH_REF_SPEED);
+
+    particleShader.SetMatrix4("viewProj", this->viewProj, true);
 
     this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
                                      particleShader, color, lightPos,

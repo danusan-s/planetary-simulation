@@ -20,8 +20,6 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
 
   // Set your model/view/projection uniforms here
   shader.SetMatrix4("model", modelMat);
-  shader.SetMatrix4("view", camera.GetViewMatrix());
-  shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
   shader.SetVector3f("viewPos", camera.position);
   shader.SetVector3f("objectColor", color);
@@ -38,12 +36,9 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
   glBindVertexArray(0);
 }
 
-void ModelRenderer::renderTrail(Camera &camera, const Shader &shader,
-                                int trailHead, GLuint trailVAO,
-                                const glm::vec3 &color) {
+void ModelRenderer::renderTrail(const Shader &shader, int trailHead,
+                                GLuint trailVAO, const glm::vec3 &color) {
   shader.Use();
-  shader.SetMatrix4("view", camera.GetViewMatrix());
-  shader.SetMatrix4("projection", camera.GetProjectionMatrix());
   shader.SetVector3f("trailColor", color);
   shader.SetInteger("trailHead", trailHead);
   shader.SetInteger("maxTrail", MAX_TRAIL);
