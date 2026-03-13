@@ -129,7 +129,7 @@ struct Object {
   Transform transform;
   Vec3 trail[MAX_TRAIL];
   int trailHead = 0;
-  GLuint trailVAO, trailVBO = 0;
+  GLuint trailVAO = 0, trailVBO = 0;
   SpriteID spriteID = INVALID_ID;
   BodyID bodyID = INVALID_ID;
 
@@ -138,9 +138,6 @@ struct Object {
   void updateTrail(const Vec3 &newPosition) {
     trailHead = (trailHead + 1) % MAX_TRAIL;
     trail[trailHead] = newPosition;
-    glBindBuffer(GL_ARRAY_BUFFER, trailVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vec3) * trailHead, sizeof(Vec3),
-                    &trail[trailHead]);
   }
 
   void destroyObj() {

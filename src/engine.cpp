@@ -6,7 +6,6 @@
 #include "resource_manager.h"
 #include "utils.h"
 #include <GLFW/glfw3.h>
-#include <chrono>
 #include <iostream>
 
 Engine::Engine() = default;
@@ -29,32 +28,23 @@ void Engine::Shutdown() {
   std::cout << "ResourceManager successfully cleared" << std::endl;
 }
 
-void Engine::Init() {
-  // load shaders
+void Engine::loadShaders() {
   std::cout << ">> Loading Shaders" << std::endl;
-
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
       Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "diffuse");
-
   ResourceManager::LoadShader(Utils::GetAssetPath("shaders/trail.vert").c_str(),
                               Utils::GetAssetPath("shaders/trail.frag").c_str(),
                               nullptr, "trail");
-
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
       Utils::GetAssetPath("shaders/sun.frag").c_str(), nullptr, "sun");
-
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/skybox.vert").c_str(),
       Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
+}
 
-  this->physics = std::make_unique<PhysicsSystem>();
-  this->world = std::make_unique<World>();
-  this->renderer = std::make_unique<RenderSystem>();
-  this->objectFactory = std::make_unique<ObjectFactory>(this->world.get());
-
-  // load textures
+void Engine::loadTextures() {
   std::cout << ">> Loading Textures" << std::endl;
   ResourceManager::LoadTexture(
       Utils::GetAssetPath("textures/white.png").c_str(), false, "solid");
@@ -77,7 +67,6 @@ void Engine::Init() {
   ResourceManager::LoadTexture(
       Utils::GetAssetPath("textures/neptune.jpg").c_str(), false, "neptune");
 
-  // load cubemap
   std::cout << ">> Loading Cubemaps" << std::endl;
   std::string px = Utils::GetAssetPath("textures/_px.jpg");
   std::string nx = Utils::GetAssetPath("textures/_nx.jpg");
@@ -88,8 +77,9 @@ void Engine::Init() {
   ResourceManager::LoadCubemap(
       {px.c_str(), nx.c_str(), py.c_str(), ny.c_str(), pz.c_str(), nz.c_str()},
       false, "space");
+}
 
-  // load models
+void Engine::loadModels() {
   std::cout << ">> Loading Models" << std::endl;
   ResourceManager::LoadModel(Utils::GetAssetPath("models/cube.obj").c_str(),
                              "cube");
@@ -97,24 +87,40 @@ void Engine::Init() {
       Utils::GetAssetPath("models/sphere_smooth.obj").c_str(), "sphere");
   ResourceManager::LoadModel(Utils::GetAssetPath("models/quad.obj").c_str(),
                              "quad");
+}
 
-  // create objects
+void Engine::initSystems() {
+  this->physics = std::make_unique<PhysicsSystem>();
+  this->world = std::make_unique<World>();
+  this->renderer = std::make_unique<RenderSystem>();
+  this->objectFactory = std::make_unique<ObjectFactory>(this->world.get());
+}
+
+void Engine::initScene() {
   std::cout << "Creating Objects" << std::endl;
-
   // To use presets:
-  // this->physics->G = this->objectFactory->parsePreset(
-  //     Utils::GetAssetPath("presets/empty.txt").c_str());
-
+  this->physics->G = this->objectFactory->parsePreset(
+      Utils::GetAssetPath("presets/collisions.txt").c_str());
   // To use random generation:
-  this->objectFactory->generateRandomSystem(30);
+  // this->objectFactory->generateRandomSystem(30);
+}
 
-  // initialize GUI
+void Engine::initImGui() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   this->guiIO = &ImGui::GetIO();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
   ImGui_ImplOpenGL3_Init("#version 330 core");
+}
+
+void Engine::Init() {
+  initSystems();
+  loadShaders();
+  loadTextures();
+  loadModels();
+  initScene();
+  initImGui();
 }
 
 void Engine::Update(float timeStep) {
@@ -180,16 +186,6 @@ void Engine::ProcessInput(float deltaTime) {
   this->inputState.lastMouseX = this->inputState.mouseX;
   this->inputState.lastMouseY = this->inputState.mouseY;
 }
-
-struct SpawnParams {
-  float mass = 1.0f;
-  float radius = 1.0f;
-  Vec3 position = Vec3(0.0f);
-  Vec3 initialSpeed = Vec3(0.0f);
-  Vec3 color = Vec3(1.0f);
-};
-
-SpawnParams spawnParams;
 
 void Engine::Render(float alpha) {
   ImGui_ImplOpenGL3_NewFrame();

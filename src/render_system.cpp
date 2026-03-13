@@ -21,15 +21,20 @@ void RenderSystem::renderSkybox(World *world) {
   this->skyboxRenderer->render(world->camera, skybox, skyboxShader);
 }
 
-void RenderSystem::renderObjects(World *world) {
-  Vec3 lightPos(100.0f, 100.0f, 100.0f); // Default light position if no sun
-  Vec3 lightColor(1.0f);
+void RenderSystem::getSunLight(World *world, Vec3 &outPos, Vec3 &outColor) {
+  outPos = Vec3(100.0f, 100.0f, 100.0f);
+  outColor = Vec3(1.0f);
   if (world->sunID != INVALID_ID) {
     const Object &sun = world->objects[world->sunID];
     const Sprite &sunSprite = world->sprites[sun.spriteID];
-    lightPos = sun.transform.position;
-    lightColor = sunSprite.color;
+    outPos = sun.transform.position;
+    outColor = sunSprite.color;
   }
+}
+
+void RenderSystem::renderObjects(World *world) {
+  Vec3 lightPos, lightColor;
+  getSunLight(world, lightPos, lightColor);
 
   for (const auto &obj : world->objects) {
     if (!obj.active || obj.spriteID == INVALID_ID ||
@@ -51,20 +56,17 @@ void RenderSystem::renderObjects(World *world) {
                                      shader, color, lightPos, lightColor);
 
     const Shader &trailShader = ResourceManager::GetShader("trail");
+    glBindBuffer(GL_ARRAY_BUFFER, obj.trailVBO);
+    glBufferData(GL_ARRAY_BUFFER, MAX_TRAIL * sizeof(Vec3), obj.trail,
+                 GL_DYNAMIC_DRAW);
     this->modelRenderer->renderTrail(world->camera, trailShader, obj.trailHead,
                                      obj.trailVAO, color);
   }
 }
 
 void RenderSystem::renderParticles(World *world) {
-  Vec3 lightPos(100.0f, 100.0f, 100.0f); // Default light position if no sun
-  Vec3 lightColor(1.0f);
-  if (world->sunID != INVALID_ID) {
-    const Object &sun = world->objects[world->sunID];
-    const Sprite &sunSprite = world->sprites[sun.spriteID];
-    lightPos = sun.transform.position;
-    lightColor = sunSprite.color;
-  }
+  Vec3 lightPos, lightColor;
+  getSunLight(world, lightPos, lightColor);
 
   for (const auto &particle : world->particles) {
     if (!particle.active || particle.spriteID == INVALID_ID ||

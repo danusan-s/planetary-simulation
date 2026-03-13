@@ -20,6 +20,9 @@ public:
 private:
   std::unique_ptr<ModelRenderer> modelRenderer;
   std::unique_ptr<SkyboxRenderer> skyboxRenderer;
+
+  // Returns the light position and color from the sun, or defaults if no sun.
+  void getSunLight(World *world, Vec3 &outPos, Vec3 &outColor);
 };
 
 #endif // !RENDER_SYSTEM_H

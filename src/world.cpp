@@ -25,6 +25,7 @@ ObjectID World::CreateObject() {
   if (objects.size() >= objects.capacity() * 0.9) {
     for (size_t i = 0; i < objects.size(); i++) {
       if (!objects[i].active) {
+        objects[i].destroyObj(); // free any lingering GPU buffers before reuse
         objects[i] = obj;
         return static_cast<ObjectID>(i);
       }

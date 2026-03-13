@@ -11,7 +11,14 @@ PhysicsSystem::~PhysicsSystem() {
 const float epsilon = 0.00001f;
 
 void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
+  applyGravityAndCollisions(world, dt, factory);
+  stepParticles(world, dt);
+  integratePositions(world, dt);
+  ++counter;
+}
 
+void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
+                                              ObjectFactory *factory) {
   for (size_t i = 0; i < world->objects.size(); i++) {
     Object &objA = world->objects[i];
     if (!objA.active || objA.bodyID == INVALID_ID ||
@@ -29,7 +36,6 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
       Body &bodyB = world->bodies[objB.bodyID];
 
       Vec3 delta = objB.transform.position - objA.transform.position;
-
       float dist_sq = delta.dot(delta) + epsilon;
       float dist = std::sqrt(dist_sq);
 
@@ -64,12 +70,13 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
       }
 
       Vec3 direction = delta.normalized();
-
       bodyA.velocity += direction * (G * bodyB.mass / dist_sq) * dt;
       bodyB.velocity -= direction * (G * bodyA.mass / dist_sq) * dt;
     }
   }
+}
 
+void PhysicsSystem::stepParticles(World *world, float dt) {
   for (auto &particle : world->particles) {
     if (!particle.active)
       continue;
@@ -94,7 +101,6 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
         particle.velocity += direction * (G * body.mass / dist_sq) * dt;
       }
 
-      // after collision check
       if (!particle.active)
         continue;
     }
@@ -105,31 +111,30 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
       particle.active = false;
     }
   }
+}
 
+void PhysicsSystem::integratePositions(World *world, float dt) {
   for (auto &obj : world->objects) {
-    if (obj.bodyID == INVALID_ID || obj.bodyID >= world->bodies.size())
+    if (!obj.active || obj.bodyID == INVALID_ID ||
+        obj.bodyID >= world->bodies.size())
       continue;
 
     Body &body = world->bodies[obj.bodyID];
-
     obj.transform.position += body.velocity * dt;
 
-    float speed_sq = body.velocity.dot(body.velocity);
-    float speed = std::sqrt(speed_sq);
+    float speed = std::sqrt(body.velocity.dot(body.velocity));
 
     // Avoid division by zero
     if (speed < 0.1f)
       speed = 0.1f;
 
-    // Inverse relationship:
-    // Higher speed -> lower sample rate (more frequent sampling)
+    // Inverse relationship: higher speed -> lower sample rate (more frequent
+    // sampling)
     int dynamicSampleRate = static_cast<int>(20.0f / speed);
-
     if (dynamicSampleRate < 1)
       dynamicSampleRate = 1;
 
     if (counter % dynamicSampleRate == 0)
       obj.updateTrail(obj.transform.position);
   }
-  ++counter;
 }
