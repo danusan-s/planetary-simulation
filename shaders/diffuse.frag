@@ -10,25 +10,32 @@ uniform vec3 objectColor;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 
+uniform vec3 viewPos;
+uniform float rimPower    = 3.0; // Sharpness of the fresnel falloff
+uniform float rimStrength = 0.6; // Overall intensity of the rim glow
+
 out vec4 FragColor;
 
 void main()
 {
     // Normalize inputs
-    vec3 normal = normalize(Normal);
+    vec3 normal   = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
+    vec3 viewDir  = normalize(viewPos - FragPos);
 
     // Lambert diffuse term
     float diff = max(dot(normal, lightDir), 0.0);
     float ambi = 0.05; // Ambient strength
 
     vec3 diffuse = diff * lightColor;
-
     vec3 ambient = ambi * lightColor;
 
     vec3 textureColor = texture(Tex, TexCoords).rgb;
-
     vec3 result = (ambient + diffuse) * textureColor * objectColor;
+
+    vec3 rimColor = normalize(objectColor + 0.0001); // Avoid division by zero
+    float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), rimPower) * rimStrength;
+    result += rimColor * rim;
 
     FragColor = vec4(result, 1.0);
 }

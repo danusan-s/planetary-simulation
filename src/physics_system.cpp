@@ -13,8 +13,8 @@ static constexpr float PARTICLE_GRAVITY_DELAY = 0.1f;
 // Prevents division by a near-zero speed producing an absurdly high rate.
 static constexpr float MIN_SPEED_FOR_TRAIL = 0.1f;
 
-// Numerator of the dynamic trail sample rate formula: rate = TRAIL_RATE_DIVISOR / speed.
-// Higher value -> trail sampled less frequently at a given speed.
+// Numerator of the dynamic trail sample rate formula: rate = TRAIL_RATE_DIVISOR
+// / speed. Higher value -> trail sampled less frequently at a given speed.
 static constexpr float TRAIL_RATE_DIVISOR = 20.0f;
 
 // Number of particles spawned per collision explosion.
@@ -57,14 +57,26 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
 
       if (dist < (bodyA.radius + bodyB.radius)) {
         // Volume is conserved so r1^3 + r2^3 = R^3
-        float newRadius = std::cbrt(std::pow(bodyA.radius, 3) +
-                                    std::pow(bodyB.radius, 3));
+        float newRadius =
+            std::cbrt(std::pow(bodyA.radius, 3) + std::pow(bodyB.radius, 3));
         Vec3 normal = delta.normalized();
-        if (bodyA.mass >= bodyB.mass) {
-          bodyA.velocity =
-              (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
-              (bodyA.mass + bodyB.mass);
-          bodyA.mass += bodyB.mass;
+        float totalMass = bodyA.mass + bodyB.mass;
+        Vec3 finalVelocity =
+            (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
+            totalMass;
+        Vec3 finalColor = (world->sprites[objA.spriteID].color * bodyA.mass +
+                           world->sprites[objB.spriteID].color * bodyB.mass) /
+                          totalMass;
+
+        if (objA.bodyID == world->sunID || objB.bodyID == world->sunID) {
+          finalColor =
+              world->sprites[world->sunID].color; // Sun's color dominates
+        }
+
+        if (objA.bodyID == world->sunID || bodyA.mass >= bodyB.mass) {
+          world->sprites[objA.spriteID].color = finalColor;
+          bodyA.velocity = finalVelocity;
+          bodyA.mass = totalMass;
           bodyA.radius = newRadius;
           objA.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objA.transform.position + normal * newRadius,
@@ -73,10 +85,9 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
         } else {
           normal =
               normal * (-1); // Flip normal to point from B to A for explosion
-          bodyB.velocity =
-              (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
-              (bodyA.mass + bodyB.mass);
-          bodyB.mass += bodyA.mass;
+          world->sprites[objB.spriteID].color = finalColor;
+          bodyB.velocity = finalVelocity;
+          bodyB.mass = totalMass;
           bodyB.radius = newRadius;
           objB.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objB.transform.position + normal * newRadius,

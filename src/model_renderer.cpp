@@ -23,6 +23,7 @@ void ModelRenderer::renderModel(const glm::mat4 &modelMat, Camera &camera,
   shader.SetMatrix4("view", camera.GetViewMatrix());
   shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
+  shader.SetVector3f("viewPos", camera.position);
   shader.SetVector3f("objectColor", color);
   shader.SetVector3f("lightPos", lightPos);
   shader.SetVector3f("lightColor", lightColor);

@@ -51,14 +51,14 @@ void ObjectFactory::generateRandomPlanet() {
                 randomFloat(-this->velocityRange, this->velocityRange));
 
   // Bright colors
-  Vec3 color(randomFloat(0.3f, 1.0f), randomFloat(0.3f, 1.0f),
-             randomFloat(0.3f, 1.0f));
+  Vec3 color(randomFloat(0.0f, 1.0f), randomFloat(0.0f, 1.0f),
+             randomFloat(0.0f, 1.0f));
 
   spawnPlanet(position, radius, mass, velocity, color, "solid");
 }
 
 void ObjectFactory::generateRandomSystem(int numPlanets) {
-  spawnSun(Vec3(0.0f), 2.0f, 10000.0f, Vec3(5.0f, 0.0f, 0.0f),
+  spawnSun(Vec3(0.0f), 2.0f, 5000.0f, Vec3(0.0f, 0.0f, 0.0f),
            Vec3(1.0f, 1.0f, 0.5f));
   for (int i = 0; i < numPlanets; ++i) {
     generateRandomPlanet();
@@ -160,6 +160,7 @@ ObjectID ObjectFactory::spawnPlanet(Vec3 position, float radius, float mass,
   obj.bodyID = this->world->AddBody(body);
 
   obj.transform.position = position;
+  obj.transform.scale = Vec3(radius);
   for (int i = 0; i < MAX_TRAIL; i++) {
     obj.trail[i] = position;
   }
@@ -189,6 +190,7 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
   obj.bodyID = this->world->AddBody(body);
 
   obj.transform.position = position;
+  obj.transform.scale = Vec3(radius);
   for (int i = 0; i < MAX_TRAIL; i++) {
     obj.trail[i] = position;
   }

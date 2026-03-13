@@ -33,6 +33,9 @@ void Engine::loadShaders() {
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
       Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "diffuse");
+  ResourceManager::LoadShader(
+      Utils::GetAssetPath("shaders/bumpy.vert").c_str(),
+      Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "bumpy");
   ResourceManager::LoadShader(Utils::GetAssetPath("shaders/trail.vert").c_str(),
                               Utils::GetAssetPath("shaders/trail.frag").c_str(),
                               nullptr, "trail");
@@ -101,10 +104,10 @@ void Engine::initSystems() {
 void Engine::initScene() {
   std::cout << "Creating Objects" << std::endl;
   // To use presets:
-  this->physics->G = this->objectFactory->parsePreset(
-      Utils::GetAssetPath("presets/collisions.txt").c_str());
+  // this->physics->G = this->objectFactory->parsePreset(
+  //     Utils::GetAssetPath("presets/collisions.txt").c_str());
   // To use random generation:
-  // this->objectFactory->generateRandomSystem(30);
+  this->objectFactory->generateRandomSystem(30);
 }
 
 void Engine::initImGui() {

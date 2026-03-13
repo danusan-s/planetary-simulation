@@ -75,7 +75,8 @@ void RenderSystem::renderObjects(World *world) {
   Vec3 lightPos, lightColor;
   getSunLight(world, lightPos, lightColor);
 
-  for (const auto &obj : world->objects) {
+  for (size_t i = 0; i < world->objects.size(); i++) {
+    const auto &obj = world->objects[i];
     if (!obj.active || obj.spriteID == INVALID_ID ||
         obj.spriteID >= world->sprites.size())
       continue;
@@ -89,7 +90,10 @@ void RenderSystem::renderObjects(World *world) {
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,
                               static_cast<glm::vec3>(obj.transform.position));
-    modelMat = glm::scale(modelMat, static_cast<glm::vec3>(obj.transform.scale));
+    modelMat =
+        glm::scale(modelMat, static_cast<glm::vec3>(obj.transform.scale));
+
+    shader.SetFloat("seed", static_cast<float>(i), true);
 
     this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
                                      shader, color, lightPos, lightColor);
