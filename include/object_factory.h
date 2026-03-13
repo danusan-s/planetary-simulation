@@ -8,7 +8,7 @@ private:
   World *world;
 
   float minPlanetMass = 1.0f;
-  float maxPlanetMass = 100.0f;
+  float maxPlanetMass = 1000.0f;
   float velocityRange = 5.0f;
   float positionRange = 100.0f;
   float radiusScale = 0.2f;

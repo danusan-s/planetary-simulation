@@ -113,14 +113,15 @@ struct Particle {
   Vec3 position;
   Vec3 velocity;
   float lifetime;
+  float elapsedTime;
   float size;
   SpriteID spriteID;
 
   bool active;
 
   Particle()
-      : position(Vec3()), velocity(Vec3()), lifetime(0.0f), size(1.0f),
-        spriteID(INVALID_ID), active(false) {
+      : position(Vec3()), velocity(Vec3()), lifetime(0.0f), elapsedTime(0.0f),
+        size(1.0f), spriteID(INVALID_ID), active(false) {
   }
 };
 

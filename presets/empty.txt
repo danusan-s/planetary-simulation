@@ -1,0 +1,2 @@
+constants
+G 1.0f

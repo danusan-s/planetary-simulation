@@ -26,7 +26,7 @@ void RenderSystem::renderSkybox(World *world) {
 }
 
 void RenderSystem::renderObjects(World *world) {
-  Vec3 lightPos(0.0f);
+  Vec3 lightPos(100.0f, 100.0f, 100.0f); // Default light position if no sun
   Vec3 lightColor(1.0f);
   if (world->sunID != INVALID_ID) {
     const Object &sun = world->objects[world->sunID];
@@ -61,7 +61,7 @@ void RenderSystem::renderObjects(World *world) {
 }
 
 void RenderSystem::renderParticles(World *world) {
-  Vec3 lightPos(0.0f);
+  Vec3 lightPos(100.0f, 100.0f, 100.0f); // Default light position if no sun
   Vec3 lightColor(1.0f);
   if (world->sunID != INVALID_ID) {
     const Object &sun = world->objects[world->sunID];

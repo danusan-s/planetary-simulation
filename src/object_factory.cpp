@@ -58,7 +58,7 @@ void ObjectFactory::generateRandomPlanet() {
 }
 
 void ObjectFactory::generateRandomSystem(int numPlanets) {
-  spawnSun(Vec3(0.0f), 2.0f, 50000.0f, Vec3(10.0f, 0.0f, 0.0f),
+  spawnSun(Vec3(0.0f), 2.0f, 10000.0f, Vec3(5.0f, 0.0f, 0.0f),
            Vec3(1.0f, 1.0f, 0.5f));
   for (int i = 0; i < numPlanets; ++i) {
     generateRandomPlanet();
@@ -204,6 +204,7 @@ ParticleID ObjectFactory::spawnParticle(Vec3 position, Vec3 velocity,
   Particle particle;
   particle.position = position;
   particle.velocity = velocity;
+  particle.elapsedTime = 0.0f;
   particle.lifetime = lifetime;
   particle.size = size;
   particle.spriteID = spriteID;
@@ -223,26 +224,33 @@ void ObjectFactory::spawnExplosion(Vec3 origin, Vec3 normal, Object &obj,
                               .color; // Use the same color as the object
   SpriteID explosionSpriteID = this->world->AddSprite(explosionSprite);
 
-  float size = obj.transform.radius * 0.2f;
-  float lifetime = 2.0f;
+  float size = obj.transform.radius * 0.1f;
+  float lifetime = 5.0f;
 
   Body &body = this->world->bodies[obj.bodyID];
   Vec3 objVel = body.velocity;
   float speed = std::sqrt(objVel.x * objVel.x + objVel.y * objVel.y +
                           objVel.z * objVel.z);
 
-  // Use the object's direction if it's moving, otherwise fall back to the
-  // impact normal
-  Vec3 baseDir = (speed > 0.0001f) ? objVel.normalized() : normal;
-
   for (int i = 0; i < count; i++) {
     Vec3 randomVec(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
                    randomFloat(-1.0f, 1.0f));
 
-    Vec3 randDir = (baseDir + randomVec * 0.5f).normalized();
+    // Project random vector onto the plane orthogonal to the impact normal
+    Vec3 perp = randomVec - normal * normal.dot(randomVec);
 
-    float randomSpeed = speed * randomFloat(0.2f, 0.95f);
-    Vec3 velocity = randDir * randomSpeed;
+    // Normalize and add a tiny bit of spherical randomness to give the disk
+    // some thickness
+    Vec3 randDir = (perp.normalized() + randomVec * 0.15f).normalized();
+
+    // Base velocity is a fraction of the original object's velocity to carry
+    // momentum
+    Vec3 baseVel = objVel * randomFloat(0.0f, 0.3f);
+
+    // The main explosive force spreads radially outward from the impact normal
+    float outwardSpeed = speed * randomFloat(0.3f, 0.6f);
+
+    Vec3 velocity = baseVel + randDir * outwardSpeed;
 
     float variation = randomFloat(0.5f, 1.5f);
     float finalLifetime = lifetime * variation;

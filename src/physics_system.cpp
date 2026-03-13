@@ -20,8 +20,6 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
 
     Body &bodyA = world->bodies[objA.bodyID];
 
-    Vec3 delVel = Vec3(0.0f);
-
     for (size_t j = i + 1; j < world->objects.size(); j++) {
       Object &objB = world->objects[j];
       if (!objB.active || objB.bodyID == INVALID_ID ||
@@ -45,20 +43,20 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyA.mass += bodyB.mass;
-          factory->spawnExplosion(objA.transform.position +
-                                      normal * objA.transform.radius,
-                                  normal, objB, 20);
           objA.transform.radius = newRadius;
+          factory->spawnExplosion(objA.transform.position + normal * newRadius,
+                                  normal, objB, 50);
           objB.active = false;
         } else {
+          normal =
+              normal * (-1); // Flip normal to point from B to A for explosion
           bodyB.velocity =
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyB.mass += bodyA.mass;
-          factory->spawnExplosion(objB.transform.position -
-                                      normal * objB.transform.radius,
-                                  normal * (-1), objA, 20);
           objB.transform.radius = newRadius;
+          factory->spawnExplosion(objB.transform.position + normal * newRadius,
+                                  normal, objA, 50);
           objA.active = false;
           break; // objA is destroyed, stop checking it against other objects
         }
@@ -76,9 +74,34 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
     if (!particle.active)
       continue;
 
+    if (particle.elapsedTime > 0.1f) {
+      for (const auto &obj : world->objects) {
+        if (!obj.active || obj.bodyID == INVALID_ID ||
+            obj.bodyID >= world->bodies.size())
+          continue;
+
+        const Body &body = world->bodies[obj.bodyID];
+        Vec3 delta = obj.transform.position - particle.position;
+        float dist_sq = delta.dot(delta) + epsilon;
+        float dist = std::sqrt(dist_sq);
+
+        if (dist < obj.transform.radius) {
+          particle.active = false;
+          break;
+        }
+
+        Vec3 direction = delta.normalized();
+        particle.velocity += direction * (G * body.mass / dist_sq) * dt;
+      }
+
+      // after collision check
+      if (!particle.active)
+        continue;
+    }
+
     particle.position += particle.velocity * dt;
-    particle.lifetime -= dt;
-    if (particle.lifetime <= 0.0f) {
+    particle.elapsedTime += dt;
+    if (particle.lifetime - particle.elapsedTime <= 0.0f) {
       particle.active = false;
     }
   }
