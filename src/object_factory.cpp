@@ -59,7 +59,7 @@ void ObjectFactory::generateRandomPlanet() {
 
 void ObjectFactory::generateRandomSystem(int numPlanets) {
   spawnSun(Vec3(0.0f), 2.0f, 5000.0f, Vec3(0.0f, 0.0f, 0.0f),
-           Vec3(1.0f, 1.0f, 0.5f));
+           Vec3(1.0f, 1.0f, 1.0f));
   for (int i = 0; i < numPlanets; ++i) {
     generateRandomPlanet();
   }
