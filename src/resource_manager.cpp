@@ -70,13 +70,20 @@ void ResourceManager::Clear() {
   // (properly) delete all shaders
   for (auto iter : Shaders)
     glDeleteProgram(iter.second.ID);
+  std::cout << "Shaders deleted successfully" << std::endl;
 
   std::cout << "Attempting to delete textures" << std::endl;
   // (properly) delete all textures
   for (auto iter : Textures)
     glDeleteTextures(1, &iter.second.ID);
 
-  std::cout << "Deleted successfully" << std::endl;
+  std::cout << "Textures deleted successfully" << std::endl;
+
+  std::cout << "Attempting to delete cubemaps" << std::endl;
+  // (properly) delete all cubemaps
+  for (auto iter : Cubemaps)
+    glDeleteTextures(1, &iter.second.ID);
+  std::cout << "Cubemaps deleted successfully" << std::endl;
 
   std::cout << "Attempting to delete models" << std::endl;
   // (properly) delete all models
@@ -85,7 +92,7 @@ void ResourceManager::Clear() {
     glDeleteBuffers(1, &iter.second.VBO);
     glDeleteBuffers(1, &iter.second.EBO);
   }
-  std::cout << "Deleted successfully" << std::endl;
+  std::cout << "Models deleted successfully" << std::endl;
 }
 
 Shader ResourceManager::loadShaderFromFile(const char *vShaderFile,
@@ -140,7 +147,8 @@ Texture2D ResourceManager::loadTextureFromFile(const char *file, bool alpha) {
   std::cout << "Loading texture file: " << file << std::endl;
   // load image
   int width, height, nrChannels;
-  unsigned char *data = stbi_load(file, &width, &height, &nrChannels, alpha ? 4 : 3);
+  unsigned char *data =
+      stbi_load(file, &width, &height, &nrChannels, alpha ? 4 : 3);
   // now generate texture
   // Error in generating ?
   texture.Generate(width, height, data);
@@ -165,7 +173,8 @@ Cubemap ResourceManager::loadCubemapFromFile(std::vector<const char *> file,
     // load image
     int width, height, nrChannels = 0;
     stbi_set_flip_vertically_on_load(false);
-    unsigned char *data = stbi_load(f, &width, &height, &nrChannels, alpha ? 4 : 3);
+    unsigned char *data =
+        stbi_load(f, &width, &height, &nrChannels, alpha ? 4 : 3);
     if (data == nullptr) {
       std::cerr << "Failed to load cubemap face: " << f << std::endl;
       continue;

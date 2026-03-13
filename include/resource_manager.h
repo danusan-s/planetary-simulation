@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 #include "cubemap.h"
 #include "model.h"

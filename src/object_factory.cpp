@@ -37,34 +37,31 @@ float randomFloat(float min, float max) {
   return dis(gen);
 }
 
-void ObjectFactory::generateRandomPlanets(int n) {
+void ObjectFactory::generateRandomPlanet() {
+  float mass = randomFloat(this->minPlanetMass, this->maxPlanetMass);
+  // Simple heuristic for radius: r ~ cbrt(mass)
+  float radius = std::cbrt(mass) * this->radiusScale;
+
+  Vec3 position(randomFloat(-this->positionRange, this->positionRange),
+                randomFloat(-this->positionRange, this->positionRange),
+                randomFloat(-this->positionRange, this->positionRange));
+
+  Vec3 velocity(randomFloat(-this->velocityRange, this->velocityRange),
+                randomFloat(-this->velocityRange, this->velocityRange),
+                randomFloat(-this->velocityRange, this->velocityRange));
+
+  // Bright colors
+  Vec3 color(randomFloat(0.5f, 1.0f), randomFloat(0.5f, 1.0f),
+             randomFloat(0.5f, 1.0f));
+
+  spawnPlanet(position, radius, mass, velocity, color, "solid");
+}
+
+void ObjectFactory::generateRandomSystem(int numPlanets) {
   spawnSun(Vec3(0.0f), 2.0f, 50000.0f, Vec3(10.0f, 0.0f, 0.0f),
            Vec3(1.0f, 1.0f, 0.5f));
-  for (int i = 0; i < n; ++i) {
-    float mass = randomFloat(1.0f, 100.0f);
-    // Simple heuristic for radius: r ~ cbrt(mass)
-    float radius = std::cbrt(mass) * 0.2f;
-
-    Vec3 position(randomFloat(-100.0f, 100.0f), randomFloat(-100.0f, 100.0f),
-                  randomFloat(-100.0f, 100.0f));
-
-    Vec3 velocity(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
-                  randomFloat(-1.0f, 1.0f));
-
-    float vlen = std::sqrt(velocity.x * velocity.x + velocity.y * velocity.y +
-                           velocity.z * velocity.z);
-    float velMag = randomFloat(0.0f, 5.0f);
-    if (vlen > 0.0f) {
-      velocity.x = (velocity.x / vlen) * velMag;
-      velocity.y = (velocity.y / vlen) * velMag;
-      velocity.z = (velocity.z / vlen) * velMag;
-    }
-
-    // Bright colors
-    Vec3 color(randomFloat(0.5f, 1.0f), randomFloat(0.5f, 1.0f),
-               randomFloat(0.5f, 1.0f));
-
-    spawnPlanet(position, radius, mass, velocity, color, "solid");
+  for (int i = 0; i < numPlanets; ++i) {
+    generateRandomPlanet();
   }
 }
 

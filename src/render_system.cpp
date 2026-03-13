@@ -1,4 +1,5 @@
 #include "render_system.h"
+#include "imgui.h"
 #include "model_renderer.h"
 #include "resource_manager.h"
 #include <glm/ext/matrix_float4x4.hpp>
@@ -15,7 +16,7 @@ RenderSystem::~RenderSystem() {
 
 void RenderSystem::renderWorld(World *world, float alpha) {
   renderSkybox(world);
-  renderObjects(world, alpha);
+  renderObjects(world);
 }
 
 void RenderSystem::renderSkybox(World *world) {
@@ -24,7 +25,7 @@ void RenderSystem::renderSkybox(World *world) {
   this->skyboxRenderer->render(world->camera, skybox, skyboxShader);
 }
 
-void RenderSystem::renderObjects(World *world, float alpha) {
+void RenderSystem::renderObjects(World *world) {
   for (const auto &obj : world->objects) {
     if (obj.spriteID == INVALID_ID || obj.spriteID >= world->sprites.size())
       continue;
@@ -56,4 +57,8 @@ void RenderSystem::renderObjects(World *world, float alpha) {
     this->modelRenderer->renderTrail(world->camera, trailShader, obj.trailHead,
                                      obj.trailVAO, color);
   }
+}
+
+void RenderSystem::renderGUI(World *world) {
+  return;
 }

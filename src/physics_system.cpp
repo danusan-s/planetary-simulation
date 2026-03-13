@@ -8,7 +8,7 @@ PhysicsSystem::PhysicsSystem() : G(1.0f) {
 PhysicsSystem::~PhysicsSystem() {
 }
 
-const float epsilon = 0.0001f;
+const float epsilon = 0.00001f;
 
 void PhysicsSystem::step(World *world, float dt) {
 
@@ -34,11 +34,15 @@ void PhysicsSystem::step(World *world, float dt) {
       float dist = std::sqrt(dist_sq);
 
       if (dist < (objA.transform.radius + objB.transform.radius)) {
+        // Volume is conserved so r1^3 + r2^3 = R^3
+        float newRadius = std::cbrt(std::pow(objA.transform.radius, 3) +
+                                    std::pow(objB.transform.radius, 3));
         if (bodyA.mass >= bodyB.mass) {
           bodyA.velocity =
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyA.mass += bodyB.mass;
+          objA.transform.radius = newRadius;
           objB.bodyID = INVALID_ID;
           objB.spriteID = INVALID_ID;
         } else {
@@ -46,6 +50,7 @@ void PhysicsSystem::step(World *world, float dt) {
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyB.mass += bodyA.mass;
+          objB.transform.radius = newRadius;
           objA.bodyID = INVALID_ID;
           objA.spriteID = INVALID_ID;
           break; // objA is destroyed, stop checking it against other objects

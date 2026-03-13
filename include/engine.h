@@ -1,8 +1,9 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
+#include "imgui.h"
 #include "object_factory.h"
 #include "physics_system.h"
 #include "render_system.h"
@@ -16,11 +17,11 @@
 class Engine {
 private:
   PhysicsSystem *physics;
-
   // Init render related stuff later as it needs OpenGL context
   RenderSystem *renderer;
   ObjectFactory *objectFactory;
   World *world;
+  ImGuiIO *guiIO;
 
 public:
   // game state
@@ -33,6 +34,8 @@ public:
 
   // initialize game state (load all shaders/textures/levels)
   void Init();
+  // shutdown game state
+  void Shutdown();
   // game loop
   void ProcessInput(float deltaTime);
   void Update(float timeStep);

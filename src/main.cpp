@@ -1,7 +1,6 @@
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 #include "engine.h"
-#include "resource_manager.h"
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -120,7 +119,8 @@ int main(int argc, char *argv[]) {
 
   // delete all resources as loaded using the resource manager
   // ---------------------------------------------------------
-  ResourceManager::Clear();
+
+  engineObj.Shutdown();
   glfwDestroyWindow(window);
   glfwTerminate();
   return 0;
@@ -166,19 +166,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-    if (engineObj.inputState.clickState == RIGHT_CLICK) {
-      engineObj.inputState.clickState = BOTH_CLICK;
-
-    } else {
-      engineObj.inputState.clickState = LEFT_CLICK;
-    }
-  } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-    if (engineObj.inputState.clickState == LEFT_CLICK) {
-      engineObj.inputState.clickState = BOTH_CLICK;
-    } else {
-      engineObj.inputState.clickState = RIGHT_CLICK;
-    }
+  if (button >= 0 && button < 8) {
+    engineObj.inputState.mouseButtons[button] = (action == GLFW_PRESS);
   }
 }
 

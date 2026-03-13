@@ -1,8 +1,12 @@
 #include "engine.h"
 #include "camera.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 #include "resource_manager.h"
 #include "utils.h"
 #include <GLFW/glfw3.h>
+#include <chrono>
 #include <iostream>
 
 Engine::Engine() {
@@ -27,7 +31,21 @@ Engine::~Engine() {
     delete this->objectFactory;
   }
 
-  std::cout << "Game Object successfully deleted" << std::endl;
+  std::cout << "Engine Object successfully deleted" << std::endl;
+}
+
+void Engine::Shutdown() {
+  std::cout << "Attempting to Delete ImGui Contexts" << std::endl;
+  if (ImGui::GetCurrentContext()) {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    std::cout << "ImGui Contexts successfully deleted" << std::endl;
+  }
+
+  std::cout << "Attempting to clear ResourceManager" << std::endl;
+  ResourceManager::Clear();
+  std::cout << "ResourceManager successfully cleared" << std::endl;
 }
 
 void Engine::Init() {
@@ -105,6 +123,14 @@ void Engine::Init() {
 
   // To use random generation:
   // this->objectFactory->generateRandomPlanets(20);
+
+  // initialize GUI
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  this->guiIO = &ImGui::GetIO();
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+  ImGui_ImplOpenGL3_Init("#version 330 core");
 }
 
 void Engine::Update(float timeStep) {
@@ -115,9 +141,18 @@ void Engine::ProcessInput(float deltaTime) {
   if (this->inputState.keys[GLFW_KEY_ESCAPE]) {
     glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
   }
+
+  static bool capsLockPressed = false;
   if (this->inputState.keys[GLFW_KEY_CAPS_LOCK]) {
-    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    if (!capsLockPressed) {
+      this->inputState.cursorLocked = !this->inputState.cursorLocked;
+      capsLockPressed = true;
+    }
   } else {
+    capsLockPressed = false;
+  }
+
+  if (this->inputState.cursorLocked) {
     glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR,
                      GLFW_CURSOR_DISABLED);
     float xoffset = this->inputState.mouseX - this->inputState.lastMouseX;
@@ -154,12 +189,53 @@ void Engine::ProcessInput(float deltaTime) {
     }
 
     this->world->camera.UpdateSpeed(isMoving, deltaTime);
+  } else {
+    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 
   this->inputState.lastMouseX = this->inputState.mouseX;
   this->inputState.lastMouseY = this->inputState.mouseY;
 }
 
+struct SpawnParams {
+  float mass = 1.0f;
+  float radius = 1.0f;
+  Vec3 position = Vec3(0.0f);
+  Vec3 initialSpeed = Vec3(0.0f);
+  Vec3 color = Vec3(1.0f);
+};
+
+SpawnParams spawnParams;
+
 void Engine::Render(float alpha) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
   this->renderer->renderWorld(this->world, alpha);
+
+  ImGui::Begin("Debug Info");
+  ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+  ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", world->camera.Position.x,
+              world->camera.Position.y, world->camera.Position.z);
+  ImGui::End();
+
+  ImGui::Begin("Spawner");
+  if (ImGui::Button("Spawn Random Planet")) {
+    this->objectFactory->generateRandomPlanet();
+  }
+
+  ImGui::SliderFloat("Mass", &spawnParams.mass, 1.0f, 1000.0f);
+  ImGui::SliderFloat("Radius", &spawnParams.radius, 0.1f, 10.0f);
+  ImGui::InputFloat3("Position", &spawnParams.position.x);
+  ImGui::InputFloat3("Initial Speed", &spawnParams.initialSpeed.x);
+  ImGui::ColorEdit3("Color", &spawnParams.color.x);
+  if (ImGui::Button("Spawn Custom Planet")) {
+    this->objectFactory->spawnPlanet(spawnParams.position, spawnParams.radius,
+                                     spawnParams.mass, spawnParams.initialSpeed,
+                                     spawnParams.color, "solid");
+  }
+  ImGui::End();
+
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

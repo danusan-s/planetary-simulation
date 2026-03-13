@@ -10,7 +10,7 @@ find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 
 # Collect all source files in src/ folder
-file(GLOB SOURCES "src/*.cpp" "src/*.c")
+file(GLOB SOURCES "src/*.cpp" "src/*.c" "src/imgui/*.cpp")
 
 # Include header files from the include/ folder
 include_directories(include)
@@ -30,7 +30,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${FREETYPE_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/include  # Include the headers in the include/ directory
-)
+        ${CMAKE_SOURCE_DIR}/include/imgui  # Include the headers in the include/ directory
+      )
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
     target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address)

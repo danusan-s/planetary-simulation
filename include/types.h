@@ -138,24 +138,21 @@ struct Viewport {
   int height;
 };
 
-enum ClickState {
-  NO_CLICK,
-  LEFT_CLICK,
-  RIGHT_CLICK,
-  BOTH_CLICK,
-};
-
 struct InputState {
   bool keys[1024];
-  ClickState clickState;
+  bool mouseButtons[8];
+  bool cursorLocked = true;
   float mouseX, mouseY;
   float lastMouseX, lastMouseY;
 
   InputState()
-      : clickState(NO_CLICK), mouseX(0.0f), mouseY(0.0f), lastMouseX(0.0f),
-        lastMouseY(0.0f) {
+      : mouseX(0.0f), mouseY(0.0f), lastMouseX(0.0f), lastMouseY(0.0f),
+        cursorLocked(true) {
     for (int i = 0; i < 1024; ++i) {
       keys[i] = false;
+    }
+    for (int i = 0; i < 8; ++i) {
+      mouseButtons[i] = false;
     }
   }
 };
