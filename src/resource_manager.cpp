@@ -23,8 +23,8 @@ Shader ResourceManager::LoadShader(const char *vShaderFile,
   return Shaders[name];
 }
 
-Shader ResourceManager::GetShader(std::string name) {
-  return Shaders[name];
+const Shader &ResourceManager::GetShader(std::string name) {
+  return Shaders.at(name);
 }
 
 Texture2D ResourceManager::LoadTexture(const char *file, bool alpha,
@@ -34,8 +34,8 @@ Texture2D ResourceManager::LoadTexture(const char *file, bool alpha,
   return Textures[name];
 }
 
-Texture2D ResourceManager::GetTexture(std::string name) {
-  return Textures[name];
+const Texture2D &ResourceManager::GetTexture(std::string name) {
+  return Textures.at(name);
 }
 
 bool ResourceManager::TextureExists(std::string name) {
@@ -49,8 +49,8 @@ Cubemap ResourceManager::LoadCubemap(std::vector<const char *> files,
   return Cubemaps[name];
 }
 
-Cubemap ResourceManager::GetCubemap(std::string name) {
-  return Cubemaps[name];
+const Cubemap &ResourceManager::GetCubemap(std::string name) {
+  return Cubemaps.at(name);
 }
 
 Model ResourceManager::LoadModel(const char *file, std::string name) {
@@ -59,8 +59,8 @@ Model ResourceManager::LoadModel(const char *file, std::string name) {
   return Models[name];
 }
 
-Model ResourceManager::GetModel(std::string name) {
-  return Models[name];
+const Model &ResourceManager::GetModel(std::string name) {
+  return Models.at(name);
 }
 
 void ResourceManager::Clear() {

@@ -28,23 +28,23 @@ public:
   // loads a geometry shader
   static Shader LoadShader(const char *vShaderFile, const char *fShaderFile,
                            const char *gShaderFile, std::string name);
-  // retrieves a stored sader
-  static Shader GetShader(std::string name);
+  // retrieves a stored shader
+  static const Shader &GetShader(std::string name);
   // loads (and generates) a texture from file
   static Texture2D LoadTexture(const char *file, bool alpha, std::string name);
   // retrieves a stored texture
-  static Texture2D GetTexture(std::string name);
+  static const Texture2D &GetTexture(std::string name);
   // returns true if texture exists, false otherwise
   static bool TextureExists(std::string name);
   // loads (and generates) a texture from file
   static Cubemap LoadCubemap(std::vector<const char *> file, bool alpha,
                              std::string name);
-  // retrieves a stored texture
-  static Cubemap GetCubemap(std::string name);
+  // retrieves a stored cubemap
+  static const Cubemap &GetCubemap(std::string name);
   // loads (and generates) a model from file
   static Model LoadModel(const char *file, std::string name);
   // retrieves a stored model
-  static Model GetModel(std::string name);
+  static const Model &GetModel(std::string name);
   // properly de-allocates all loaded resources
   static void Clear();
 
