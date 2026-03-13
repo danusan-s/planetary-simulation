@@ -142,6 +142,18 @@ struct Object {
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(Vec3) * trailHead, sizeof(Vec3),
                     &trail[trailHead]);
   }
+
+  void destroyObj() {
+    active = false;
+    if (trailVAO != 0) {
+      glDeleteVertexArrays(1, &trailVAO);
+      trailVAO = 0;
+    }
+    if (trailVBO != 0) {
+      glDeleteBuffers(1, &trailVBO);
+      trailVBO = 0;
+    }
+  }
 };
 
 struct Viewport {

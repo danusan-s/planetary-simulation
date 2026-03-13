@@ -10,6 +10,12 @@ World::World() {
   particles.reserve(1024);
 }
 
+World::~World() {
+  for (auto &obj : objects) {
+    obj.destroyObj();
+  }
+}
+
 ObjectID World::CreateObject() {
   Object obj;
   obj.active = true;

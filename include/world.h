@@ -8,6 +8,7 @@
 class World {
 public:
   World();
+  ~World();
   Camera camera;
   std::vector<Object> objects;
   std::vector<Sprite> sprites;

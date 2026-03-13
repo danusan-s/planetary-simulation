@@ -46,7 +46,7 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
           objA.transform.radius = newRadius;
           factory->spawnExplosion(objA.transform.position + normal * newRadius,
                                   normal, objB, 50);
-          objB.active = false;
+          objB.destroyObj();
         } else {
           normal =
               normal * (-1); // Flip normal to point from B to A for explosion
@@ -57,7 +57,7 @@ void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
           objB.transform.radius = newRadius;
           factory->spawnExplosion(objB.transform.position + normal * newRadius,
                                   normal, objA, 50);
-          objA.active = false;
+          objA.destroyObj();
           break; // objA is destroyed, stop checking it against other objects
         }
         continue;
