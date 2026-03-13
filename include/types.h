@@ -13,6 +13,7 @@ using ModelID = std::string;
 using SpriteID = uint32_t;
 using BodyID = uint32_t;
 using ObjectID = uint32_t;
+using ParticleID = uint32_t;
 using SunID = ObjectID;
 
 constexpr uint32_t INVALID_ID = UINT32_MAX;
@@ -103,9 +104,23 @@ struct Sprite {
 struct Body {
   Vec3 velocity;
   float mass;
-  float invMass;
 
-  Body() : velocity(Vec3()), mass(1.0f), invMass(1.0f) {
+  Body() : velocity(Vec3()), mass(1.0f) {
+  }
+};
+
+struct Particle {
+  Vec3 position;
+  Vec3 velocity;
+  float lifetime;
+  float size;
+  SpriteID spriteID;
+
+  bool active;
+
+  Particle()
+      : position(Vec3()), velocity(Vec3()), lifetime(0.0f), size(1.0f),
+        spriteID(INVALID_ID), active(false) {
   }
 };
 
@@ -117,10 +132,7 @@ struct Object {
   SpriteID spriteID = INVALID_ID;
   BodyID bodyID = INVALID_ID;
 
-  // Vec3 getPreviousPos() const {
-  //   int prevIndex = (trailHead + MAX_TRAIL - 1) % MAX_TRAIL;
-  //   return trail[prevIndex];
-  // }
+  bool active = false;
 
   void updateTrail(const Vec3 &newPosition) {
     trailHead = (trailHead + 1) % MAX_TRAIL;

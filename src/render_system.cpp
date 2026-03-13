@@ -1,5 +1,4 @@
 #include "render_system.h"
-#include "imgui.h"
 #include "model_renderer.h"
 #include "resource_manager.h"
 #include <glm/ext/matrix_float4x4.hpp>
@@ -17,6 +16,7 @@ RenderSystem::~RenderSystem() {
 void RenderSystem::renderWorld(World *world, float alpha) {
   renderSkybox(world);
   renderObjects(world);
+  renderParticles(world);
 }
 
 void RenderSystem::renderSkybox(World *world) {
@@ -26,8 +26,18 @@ void RenderSystem::renderSkybox(World *world) {
 }
 
 void RenderSystem::renderObjects(World *world) {
+  Vec3 lightPos(0.0f);
+  Vec3 lightColor(1.0f);
+  if (world->sunID != INVALID_ID) {
+    const Object &sun = world->objects[world->sunID];
+    const Sprite &sunSprite = world->sprites[sun.spriteID];
+    lightPos = sun.transform.position;
+    lightColor = sunSprite.color;
+  }
+
   for (const auto &obj : world->objects) {
-    if (obj.spriteID == INVALID_ID || obj.spriteID >= world->sprites.size())
+    if (!obj.active || obj.spriteID == INVALID_ID ||
+        obj.spriteID >= world->sprites.size())
       continue;
 
     const Sprite &sprite = world->sprites[obj.spriteID];
@@ -35,15 +45,6 @@ void RenderSystem::renderObjects(World *world) {
     const Model &model = ResourceManager::GetModel(sprite.modelID);
     const Shader &shader = ResourceManager::GetShader(sprite.shaderID);
     const glm::vec3 color = sprite.color;
-
-    Vec3 lightPos(0.0f);
-    Vec3 lightColor(1.0f);
-    if (world->sunID != INVALID_ID) {
-      const Object &sun = world->objects[world->sunID];
-      const Sprite &sunSprite = world->sprites[sun.spriteID];
-      lightPos = sun.transform.position;
-      lightColor = sunSprite.color;
-    }
 
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,
@@ -56,6 +57,40 @@ void RenderSystem::renderObjects(World *world) {
     const Shader &trailShader = ResourceManager::GetShader("trail");
     this->modelRenderer->renderTrail(world->camera, trailShader, obj.trailHead,
                                      obj.trailVAO, color);
+  }
+}
+
+void RenderSystem::renderParticles(World *world) {
+  Vec3 lightPos(0.0f);
+  Vec3 lightColor(1.0f);
+  if (world->sunID != INVALID_ID) {
+    const Object &sun = world->objects[world->sunID];
+    const Sprite &sunSprite = world->sprites[sun.spriteID];
+    lightPos = sun.transform.position;
+    lightColor = sunSprite.color;
+  }
+
+  for (const auto &particle : world->particles) {
+    if (!particle.active || particle.spriteID == INVALID_ID ||
+        particle.spriteID >= world->sprites.size())
+      continue;
+
+    const Sprite &sprite = world->sprites[particle.spriteID];
+    const Texture2D &texture = ResourceManager::GetTexture(sprite.textureID);
+    const Model &model = ResourceManager::GetModel(sprite.modelID);
+    const Shader &particleShader = ResourceManager::GetShader(sprite.shaderID);
+    const glm::vec3 color = sprite.color;
+
+    glm::mat4 modelMat = glm::mat4(1.0f);
+
+    modelMat =
+        glm::translate(modelMat, static_cast<glm::vec3>(particle.position));
+
+    modelMat = glm::scale(modelMat, glm::vec3(particle.size));
+
+    this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
+                                     particleShader, color, lightPos,
+                                     lightColor);
   }
 }
 

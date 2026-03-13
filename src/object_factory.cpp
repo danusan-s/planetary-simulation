@@ -197,3 +197,58 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
 
   return objID;
 }
+
+ParticleID ObjectFactory::spawnParticle(Vec3 position, Vec3 velocity,
+                                        float lifetime, float size,
+                                        SpriteID spriteID) {
+  Particle particle;
+  particle.position = position;
+  particle.velocity = velocity;
+  particle.lifetime = lifetime;
+  particle.size = size;
+  particle.spriteID = spriteID;
+  particle.active = true;
+
+  return this->world->AddParticle(particle);
+}
+
+void ObjectFactory::spawnExplosion(Vec3 origin, Vec3 normal, Object &obj,
+                                   int count) {
+
+  Sprite explosionSprite;
+  explosionSprite.modelID = "cube";
+  explosionSprite.textureID = "solid";
+  explosionSprite.shaderID = "diffuse";
+  explosionSprite.color = this->world->sprites[obj.spriteID]
+                              .color; // Use the same color as the object
+  SpriteID explosionSpriteID = this->world->AddSprite(explosionSprite);
+
+  float size = obj.transform.radius * 0.2f;
+  float lifetime = 2.0f;
+
+  Body &body = this->world->bodies[obj.bodyID];
+  Vec3 objVel = body.velocity;
+  float speed = std::sqrt(objVel.x * objVel.x + objVel.y * objVel.y +
+                          objVel.z * objVel.z);
+
+  // Use the object's direction if it's moving, otherwise fall back to the
+  // impact normal
+  Vec3 baseDir = (speed > 0.0001f) ? objVel.normalized() : normal;
+
+  for (int i = 0; i < count; i++) {
+    Vec3 randomVec(randomFloat(-1.0f, 1.0f), randomFloat(-1.0f, 1.0f),
+                   randomFloat(-1.0f, 1.0f));
+
+    Vec3 randDir = (baseDir + randomVec * 0.5f).normalized();
+
+    float randomSpeed = speed * randomFloat(0.2f, 0.95f);
+    Vec3 velocity = randDir * randomSpeed;
+
+    float variation = randomFloat(0.5f, 1.5f);
+    float finalLifetime = lifetime * variation;
+    float finalSize = size * variation;
+
+    spawnParticle(origin, velocity, finalLifetime, finalSize,
+                  explosionSpriteID);
+  }
+}

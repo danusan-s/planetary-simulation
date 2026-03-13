@@ -14,6 +14,7 @@ public:
   void renderSkybox(World *world);
   void renderObjects(World *world);
   void renderGUI(World *world);
+  void renderParticles(World *world);
 
 private:
   ModelRenderer *modelRenderer;

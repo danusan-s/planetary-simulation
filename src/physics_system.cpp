@@ -10,11 +10,12 @@ PhysicsSystem::~PhysicsSystem() {
 
 const float epsilon = 0.00001f;
 
-void PhysicsSystem::step(World *world, float dt) {
+void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
 
   for (size_t i = 0; i < world->objects.size(); i++) {
     Object &objA = world->objects[i];
-    if (objA.bodyID == INVALID_ID || objA.bodyID >= world->bodies.size())
+    if (!objA.active || objA.bodyID == INVALID_ID ||
+        objA.bodyID >= world->bodies.size())
       continue;
 
     Body &bodyA = world->bodies[objA.bodyID];
@@ -23,7 +24,8 @@ void PhysicsSystem::step(World *world, float dt) {
 
     for (size_t j = i + 1; j < world->objects.size(); j++) {
       Object &objB = world->objects[j];
-      if (objB.bodyID == INVALID_ID || objB.bodyID >= world->bodies.size())
+      if (!objB.active || objB.bodyID == INVALID_ID ||
+          objB.bodyID >= world->bodies.size())
         continue;
 
       Body &bodyB = world->bodies[objB.bodyID];
@@ -37,22 +39,27 @@ void PhysicsSystem::step(World *world, float dt) {
         // Volume is conserved so r1^3 + r2^3 = R^3
         float newRadius = std::cbrt(std::pow(objA.transform.radius, 3) +
                                     std::pow(objB.transform.radius, 3));
+        Vec3 normal = delta.normalized();
         if (bodyA.mass >= bodyB.mass) {
           bodyA.velocity =
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyA.mass += bodyB.mass;
+          factory->spawnExplosion(objA.transform.position +
+                                      normal * objA.transform.radius,
+                                  normal, objB, 20);
           objA.transform.radius = newRadius;
-          objB.bodyID = INVALID_ID;
-          objB.spriteID = INVALID_ID;
+          objB.active = false;
         } else {
           bodyB.velocity =
               (bodyA.velocity * bodyA.mass + bodyB.velocity * bodyB.mass) /
               (bodyA.mass + bodyB.mass);
           bodyB.mass += bodyA.mass;
+          factory->spawnExplosion(objB.transform.position -
+                                      normal * objB.transform.radius,
+                                  normal * (-1), objA, 20);
           objB.transform.radius = newRadius;
-          objA.bodyID = INVALID_ID;
-          objA.spriteID = INVALID_ID;
+          objA.active = false;
           break; // objA is destroyed, stop checking it against other objects
         }
         continue;
@@ -62,6 +69,17 @@ void PhysicsSystem::step(World *world, float dt) {
 
       bodyA.velocity += direction * (G * bodyB.mass / dist_sq) * dt;
       bodyB.velocity -= direction * (G * bodyA.mass / dist_sq) * dt;
+    }
+  }
+
+  for (auto &particle : world->particles) {
+    if (!particle.active)
+      continue;
+
+    particle.position += particle.velocity * dt;
+    particle.lifetime -= dt;
+    if (particle.lifetime <= 0.0f) {
+      particle.active = false;
     }
   }
 

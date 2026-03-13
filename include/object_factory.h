@@ -22,6 +22,9 @@ public:
                        Vec3 initialSpeed, Vec3 color, std::string textureID);
   ObjectID spawnSun(Vec3 position, float radius, float mass, Vec3 initialSpeed,
                     Vec3 color);
+  ParticleID spawnParticle(Vec3 position, Vec3 velocity, float lifetime,
+                           float size, SpriteID spriteID);
+  void spawnExplosion(Vec3 origin, Vec3 normal, Object &obj, int count);
 };
 
 #endif // !OBJECT_FACTORY_H

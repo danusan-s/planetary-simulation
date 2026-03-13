@@ -51,18 +51,19 @@ void Engine::Shutdown() {
 void Engine::Init() {
   // load shaders
   std::cout << ">> Loading Shaders" << std::endl;
+
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
       Utils::GetAssetPath("shaders/diffuse.frag").c_str(), nullptr, "diffuse");
-  ResourceManager::LoadShader(Utils::GetAssetPath("shaders/debug.vert").c_str(),
-                              Utils::GetAssetPath("shaders/debug.frag").c_str(),
-                              nullptr, "debug");
+
   ResourceManager::LoadShader(Utils::GetAssetPath("shaders/trail.vert").c_str(),
                               Utils::GetAssetPath("shaders/trail.frag").c_str(),
                               nullptr, "trail");
+
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/diffuse.vert").c_str(),
       Utils::GetAssetPath("shaders/sun.frag").c_str(), nullptr, "sun");
+
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/skybox.vert").c_str(),
       Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
@@ -113,13 +114,15 @@ void Engine::Init() {
                              "cube");
   ResourceManager::LoadModel(
       Utils::GetAssetPath("models/sphere_smooth.obj").c_str(), "sphere");
+  ResourceManager::LoadModel(Utils::GetAssetPath("models/quad.obj").c_str(),
+                             "quad");
 
   // create objects
   std::cout << "Creating Objects" << std::endl;
 
   // To use presets:
   this->physics->G = this->objectFactory->parsePreset(
-      Utils::GetAssetPath("presets/three_bodies.txt").c_str());
+      Utils::GetAssetPath("presets/collisions.txt").c_str());
 
   // To use random generation:
   // this->objectFactory->generateRandomPlanets(20);
@@ -134,7 +137,7 @@ void Engine::Init() {
 }
 
 void Engine::Update(float timeStep) {
-  this->physics->step(this->world, timeStep);
+  this->physics->step(this->world, timeStep, this->objectFactory);
 }
 
 void Engine::ProcessInput(float deltaTime) {
