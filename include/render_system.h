@@ -11,10 +11,9 @@ public:
   RenderSystem();
   ~RenderSystem();
 
-  void renderWorld(World *world, float alpha);
+  void renderWorld(World *world);
   void renderSkybox(World *world);
   void renderObjects(World *world);
-  void renderGUI(World *world);
   void renderParticles(World *world);
 
 private:

@@ -1,5 +1,5 @@
-#ifndef OBJECT_MANAGER_H
-#define OBJECT_MANAGER_H
+#ifndef WORLD_H
+#define WORLD_H
 
 #include "camera.h"
 #include "types.h"
@@ -14,7 +14,7 @@ public:
   std::vector<Sprite> sprites;
   std::vector<Body> bodies;
   std::vector<Particle> particles;
-  SunID sunID; // Pointer to the sun object for easy access
+  ObjectID sunID; // Index of the sun object; INVALID_ID if no sun exists
 
   ObjectID CreateObject();
   SpriteID AddSprite(const Sprite &sprite);
@@ -22,4 +22,4 @@ public:
   ParticleID AddParticle(const Particle &particle);
 };
 
-#endif
+#endif // !WORLD_H

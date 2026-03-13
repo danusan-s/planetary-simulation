@@ -31,6 +31,7 @@ private:
   std::unique_ptr<ObjectFactory> objectFactory;
   ImGuiIO *guiIO = nullptr;
   SpawnParams spawnParams;
+  GLFWwindow *window = nullptr;
 
 public:
   // game state
@@ -42,13 +43,13 @@ public:
   ~Engine();
 
   // initialize game state (load all shaders/textures/levels)
-  void Init();
+  void Init(GLFWwindow *window);
   // shutdown game state
   void Shutdown();
   // game loop
   void ProcessInput(float deltaTime);
   void Update(float timeStep);
-  void Render(float alpha);
+  void Render();
 
 private:
   void loadShaders();

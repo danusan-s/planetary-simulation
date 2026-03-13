@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 
   // initialize game
   // ---------------
-  engineObj.Init();
+  engineObj.Init(window);
 
   // deltaTime variables
   // -------------------
@@ -95,7 +95,8 @@ int main(int argc, char *argv[]) {
 
     // render
     // ------
-    float alpha = accumulatedTime / timeStep;
+    // float alpha = accumulatedTime / timeStep;
+    // For interpolation, not currently used as physics rate is 240
 
     glDisable(GL_SCISSOR_TEST);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // gray bars
@@ -109,7 +110,7 @@ int main(int argc, char *argv[]) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    engineObj.Render(alpha);
+    engineObj.Render();
 
     glfwSwapBuffers(window);
 
@@ -148,14 +149,13 @@ Viewport letterbox_viewport(int windowWidth, int windowHeight) {
     glScissor(xOffset, 0, newWidth, windowHeight);
     glViewport(xOffset, 0, newWidth, windowHeight);
     return Viewport{xOffset, 0, newWidth, windowHeight};
-  } else {
-    int newHeight = static_cast<int>(windowWidth / targetAspectRatio);
-    int yOffset = (windowHeight - newHeight) / 2;
-    glScissor(0, yOffset, windowWidth, newHeight);
-    glViewport(0, yOffset, windowWidth, newHeight);
-    return Viewport{0, yOffset, windowWidth, newHeight};
   }
-  return Viewport{0, 0, windowWidth, windowHeight};
+
+  int newHeight = static_cast<int>(windowWidth / targetAspectRatio);
+  int yOffset = (windowHeight - newHeight) / 2;
+  glScissor(0, yOffset, windowWidth, newHeight);
+  glViewport(0, yOffset, windowWidth, newHeight);
+  return Viewport{0, yOffset, windowWidth, newHeight};
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {

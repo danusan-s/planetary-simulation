@@ -124,7 +124,7 @@ Shader ResourceManager::loadShaderFromFile(const char *vShaderFile,
       geometryShaderFile.close();
       geometryCode = gShaderStream.str();
     }
-  } catch (std::exception e) {
+  } catch (const std::exception &e) {
     std::cout << "ERROR::SHADER: Failed to read shader files" << std::endl;
   }
   const char *vShaderCode = vertexCode.c_str();
@@ -206,7 +206,7 @@ Model ResourceManager::loadModelFromFile(const char *file) {
     modelWavefrontObjFile.close();
     // convert stream into string
     modelData = wavefrontObjStream.str();
-  } catch (std::exception e) {
+  } catch (const std::exception &e) {
     std::cout << "ERROR::MODEL: Failed to read model files" << std::endl;
   }
 

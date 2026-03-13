@@ -110,11 +110,12 @@ void Engine::initImGui() {
   ImGui::CreateContext();
   this->guiIO = &ImGui::GetIO();
   ImGui::StyleColorsDark();
-  ImGui_ImplGlfw_InitForOpenGL(glfwGetCurrentContext(), true);
+  ImGui_ImplGlfw_InitForOpenGL(this->window, true);
   ImGui_ImplOpenGL3_Init("#version 330 core");
 }
 
-void Engine::Init() {
+void Engine::Init(GLFWwindow *win) {
+  this->window = win;
   initSystems();
   loadShaders();
   loadTextures();
@@ -129,7 +130,7 @@ void Engine::Update(float timeStep) {
 
 void Engine::ProcessInput(float deltaTime) {
   if (this->inputState.keys[GLFW_KEY_ESCAPE]) {
-    glfwSetWindowShouldClose(glfwGetCurrentContext(), true);
+    glfwSetWindowShouldClose(this->window, true);
   }
 
   static bool capsLockPressed = false;
@@ -143,8 +144,7 @@ void Engine::ProcessInput(float deltaTime) {
   }
 
   if (this->inputState.cursorLocked) {
-    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR,
-                     GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     float xoffset = this->inputState.mouseX - this->inputState.lastMouseX;
     float yoffset =
         this->inputState.lastMouseY -
@@ -180,23 +180,23 @@ void Engine::ProcessInput(float deltaTime) {
 
     this->world->camera.UpdateSpeed(isMoving, deltaTime);
   } else {
-    glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 
   this->inputState.lastMouseX = this->inputState.mouseX;
   this->inputState.lastMouseY = this->inputState.mouseY;
 }
 
-void Engine::Render(float alpha) {
+void Engine::Render() {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
-  this->renderer->renderWorld(this->world.get(), alpha);
+  this->renderer->renderWorld(this->world.get());
 
   ImGui::Begin("Debug Info");
   ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-  ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", world->camera.Position.x,
-              world->camera.Position.y, world->camera.Position.z);
+  ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", world->camera.position.x,
+              world->camera.position.y, world->camera.position.z);
   ImGui::End();
 
   ImGui::Begin("Spawner");

@@ -5,11 +5,12 @@
 
 RenderSystem::RenderSystem()
     : modelRenderer(std::make_unique<ModelRenderer>()),
-      skyboxRenderer(std::make_unique<SkyboxRenderer>()) {}
+      skyboxRenderer(std::make_unique<SkyboxRenderer>()) {
+}
 
 RenderSystem::~RenderSystem() = default;
 
-void RenderSystem::renderWorld(World *world, float alpha) {
+void RenderSystem::renderWorld(World *world) {
   renderSkybox(world);
   renderObjects(world);
   renderParticles(world);
@@ -90,8 +91,4 @@ void RenderSystem::renderParticles(World *world) {
                                      particleShader, color, lightPos,
                                      lightColor);
   }
-}
-
-void RenderSystem::renderGUI(World *world) {
-  return;
 }

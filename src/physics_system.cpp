@@ -2,13 +2,29 @@
 #include "types.h"
 #include <glm/ext/quaternion_geometric.hpp>
 
+// Small value added to distances to prevent division by zero in gravity.
+static constexpr float GRAVITY_EPSILON = 0.00001f;
+
+// Seconds after a particle spawns before gravity starts affecting it.
+// Prevents newly spawned explosion particles from immediately collapsing back.
+static constexpr float PARTICLE_GRAVITY_DELAY = 0.1f;
+
+// Minimum speed (units/s) used when computing the dynamic trail sample rate.
+// Prevents division by a near-zero speed producing an absurdly high rate.
+static constexpr float MIN_SPEED_FOR_TRAIL = 0.1f;
+
+// Numerator of the dynamic trail sample rate formula: rate = TRAIL_RATE_DIVISOR / speed.
+// Higher value -> trail sampled less frequently at a given speed.
+static constexpr float TRAIL_RATE_DIVISOR = 20.0f;
+
+// Number of particles spawned per collision explosion.
+static constexpr int EXPLOSION_PARTICLE_COUNT = 50;
+
 PhysicsSystem::PhysicsSystem() : G(1.0f) {
 }
 
 PhysicsSystem::~PhysicsSystem() {
 }
-
-const float epsilon = 0.00001f;
 
 void PhysicsSystem::step(World *world, float dt, ObjectFactory *factory) {
   applyGravityAndCollisions(world, dt, factory);
@@ -36,7 +52,7 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
       Body &bodyB = world->bodies[objB.bodyID];
 
       Vec3 delta = objB.transform.position - objA.transform.position;
-      float dist_sq = delta.dot(delta) + epsilon;
+      float dist_sq = delta.dot(delta) + GRAVITY_EPSILON;
       float dist = std::sqrt(dist_sq);
 
       if (dist < (objA.transform.radius + objB.transform.radius)) {
@@ -51,7 +67,7 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
           bodyA.mass += bodyB.mass;
           objA.transform.radius = newRadius;
           factory->spawnExplosion(objA.transform.position + normal * newRadius,
-                                  normal, objB, 50);
+                                  normal, objB, EXPLOSION_PARTICLE_COUNT);
           objB.destroyObj();
         } else {
           normal =
@@ -62,7 +78,7 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
           bodyB.mass += bodyA.mass;
           objB.transform.radius = newRadius;
           factory->spawnExplosion(objB.transform.position + normal * newRadius,
-                                  normal, objA, 50);
+                                  normal, objA, EXPLOSION_PARTICLE_COUNT);
           objA.destroyObj();
           break; // objA is destroyed, stop checking it against other objects
         }
@@ -81,7 +97,7 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
     if (!particle.active)
       continue;
 
-    if (particle.elapsedTime > 0.1f) {
+    if (particle.elapsedTime > PARTICLE_GRAVITY_DELAY) {
       for (const auto &obj : world->objects) {
         if (!obj.active || obj.bodyID == INVALID_ID ||
             obj.bodyID >= world->bodies.size())
@@ -89,7 +105,7 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
 
         const Body &body = world->bodies[obj.bodyID];
         Vec3 delta = obj.transform.position - particle.position;
-        float dist_sq = delta.dot(delta) + epsilon;
+        float dist_sq = delta.dot(delta) + GRAVITY_EPSILON;
         float dist = std::sqrt(dist_sq);
 
         if (dist < obj.transform.radius) {
@@ -125,12 +141,12 @@ void PhysicsSystem::integratePositions(World *world, float dt) {
     float speed = std::sqrt(body.velocity.dot(body.velocity));
 
     // Avoid division by zero
-    if (speed < 0.1f)
-      speed = 0.1f;
+    if (speed < MIN_SPEED_FOR_TRAIL)
+      speed = MIN_SPEED_FOR_TRAIL;
 
     // Inverse relationship: higher speed -> lower sample rate (more frequent
     // sampling)
-    int dynamicSampleRate = static_cast<int>(20.0f / speed);
+    int dynamicSampleRate = static_cast<int>(TRAIL_RATE_DIVISOR / speed);
     if (dynamicSampleRate < 1)
       dynamicSampleRate = 1;
 

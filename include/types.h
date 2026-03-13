@@ -14,7 +14,6 @@ using SpriteID = uint32_t;
 using BodyID = uint32_t;
 using ObjectID = uint32_t;
 using ParticleID = uint32_t;
-using SunID = ObjectID;
 
 constexpr uint32_t INVALID_ID = UINT32_MAX;
 constexpr int MAX_TRAIL = 512;

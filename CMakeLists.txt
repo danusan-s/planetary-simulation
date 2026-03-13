@@ -7,7 +7,6 @@ set(PROJECT_NAME "PlanetarySystem")
 # Find dependencies
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(Freetype REQUIRED)
 
 # Collect all source files in src/ folder
 file(GLOB SOURCES "src/*.cpp" "src/*.c" "src/imgui/*.cpp")
@@ -22,15 +21,13 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME}
     glfw
     OpenGL::GL
-    ${FREETYPE_LIBRARIES}
 )
 
-# Include directories for FreeType and the include/ folder
+# Include directories for the include/ folder
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        ${FREETYPE_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}/include  # Include the headers in the include/ directory
-        ${CMAKE_SOURCE_DIR}/include/imgui  # Include the headers in the include/ directory
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/imgui
       )
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
