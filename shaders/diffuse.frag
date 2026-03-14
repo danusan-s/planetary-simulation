@@ -32,9 +32,9 @@ void main()
     vec3 textureColor = texture(Tex, TexCoords).rgb;
     vec3 result = (ambient + diffuse) * textureColor * objectColor;
 
-    vec3 rimColor = normalize(objectColor + 0.0001); // Avoid division by zero
-    float brightness = dot(rimColor, vec3(0.2126, 0.7152, 0.0722));      // perceptual luminance of hue-normalized color
-    float rimStrength = mix(1.0, 0.2, brightness);                        // darker objects get stronger rim
+    vec3 rimColor = normalize(objectColor + 0.0001);                      // preserve hue at full brightness
+    float brightness = dot(objectColor, vec3(0.2126, 0.7152, 0.0722));   // perceptual luminance of original color
+    float rimStrength = mix(1.0, 0.0, brightness);                        // darker objects get stronger rim
     float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), rimPower) * rimStrength;
     result += rimColor * rim;
 
