@@ -55,6 +55,12 @@ void Engine::loadShaders() {
       Utils::GetAssetPath("shaders/particle.vert").c_str(),
       Utils::GetAssetPath("shaders/particle.frag").c_str(), nullptr,
       "particle");
+
+  std::cout << ">> Loading Compute Shaders" << std::endl;
+  ResourceManager::LoadComputeShader(
+      Utils::GetAssetPath("shaders/objectphy.comp").c_str(), "objectphy");
+  ResourceManager::LoadComputeShader(
+      Utils::GetAssetPath("shaders/particlephy.comp").c_str(), "particlephy");
 }
 
 void Engine::loadTextures() {

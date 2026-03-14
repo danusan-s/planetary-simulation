@@ -1,0 +1,126 @@
+#version 430 core
+layout(local_size_x = 64) in;
+
+// std430 GPUBody — 48 bytes, matches the C++ struct exactly
+struct GPUBody {
+    vec3  position;  // offset  0
+    float mass;      // offset 12
+    vec3  velocity;  // offset 16
+    float radius;    // offset 28
+    vec3  scale;     // offset 32
+    float alive;     // offset 44
+};
+
+// Binding 0: read (ping buffer)
+layout(std430, binding = 0) readonly buffer BodyBufferIn {
+    GPUBody bodiesIn[];
+};
+
+// Binding 1: write (pong buffer)
+layout(std430, binding = 1) writeonly buffer BodyBufferOut {
+    GPUBody bodiesOut[];
+};
+
+// Binding 2: collision output
+//   [0]  = uint collisionCount (atomic)
+//   [1..3] = padding to align CollisionPair array to 16 bytes
+//   [4+] = CollisionPair pairs (2 uints each)
+layout(std430, binding = 2) buffer CollisionBuffer {
+    uint collisionData[];
+};
+
+// Binding 3: trail storage — flat vec4 array
+//   slot = objectIdx * MAX_TRAIL + trailHead
+layout(std430, binding = 3) buffer TrailBuffer {
+    vec4 trailData[];
+};
+
+uniform float dt;
+uniform float G;
+uniform int   objectCount;
+uniform int   frameCounter;
+uniform int   trailHeads[512]; // per-object trail write head
+
+const float GRAVITY_EPSILON   = 0.00001;
+const float MIN_SPEED_FOR_TRAIL = 0.1;
+const float TRAIL_RATE_DIVISOR  = 20.0;
+const int   MAX_TRAIL           = 512;
+const int   MAX_COLLISIONS      = 128;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= uint(objectCount)) return;
+
+    GPUBody self = bodiesIn[i];
+    if (self.alive < 0.5) {
+        bodiesOut[i] = self;
+        return;
+    }
+
+    vec3 acceleration = vec3(0.0);
+    bool collided     = false;
+    uint survivorIdx  = i;
+    uint destroyedIdx = i;
+
+    for (int j = 0; j < objectCount; j++) {
+        if (j == int(i)) continue;
+        GPUBody other = bodiesIn[j];
+        if (other.alive < 0.5) continue;
+
+        vec3  delta   = other.position - self.position;
+        float distSq  = dot(delta, delta) + GRAVITY_EPSILON;
+        float dist    = sqrt(distSq);
+
+        // Collision detection
+        if (dist < (self.radius + other.radius)) {
+            // Only the invocation that owns the survivor writes the pair,
+            // preventing duplicate entries for the same collision.
+            // Survivor = heavier body; ties broken by lower index.
+            bool iAmSurvivor = (self.mass > other.mass) ||
+                               (self.mass == other.mass && i < uint(j));
+            if (iAmSurvivor && !collided) {
+                collided     = true;
+                survivorIdx  = i;
+                destroyedIdx = uint(j);
+            }
+            continue; // skip gravity for colliding pair
+        }
+
+        // Gravitational acceleration
+        vec3 dir  = delta / dist;
+        acceleration += dir * (G * other.mass / distSq);
+    }
+
+    // Write collision pair atomically (one entry per surviving invocation)
+    if (collided) {
+        uint slot = atomicAdd(collisionData[0], 1u);
+        if (slot < uint(MAX_COLLISIONS)) {
+            // Pairs start at uint index 4 (16-byte offset), each pair = 2 uints
+            uint base = 4u + slot * 2u;
+            collisionData[base]     = survivorIdx;
+            collisionData[base + 1u] = destroyedIdx;
+        }
+    }
+
+    // Integrate velocity and position
+    vec3 newVel = self.velocity + acceleration * dt;
+    vec3 newPos = self.position + newVel * dt;
+
+    // Trail append
+    float speed = length(newVel);
+    if (speed < MIN_SPEED_FOR_TRAIL) speed = MIN_SPEED_FOR_TRAIL;
+    int dynamicRate = int(TRAIL_RATE_DIVISOR / speed);
+    if (dynamicRate < 1) dynamicRate = 1;
+
+    if (frameCounter % dynamicRate == 0) {
+        int head    = (trailHeads[i] + 1) % MAX_TRAIL;
+        int slot    = int(i) * MAX_TRAIL + head;
+        trailData[slot] = vec4(newPos, 0.0);
+    }
+
+    // Write result
+    GPUBody result  = self;
+    result.velocity = newVel;
+    result.position = newPos;
+    bodiesOut[i]    = result;
+}

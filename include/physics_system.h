@@ -2,7 +2,10 @@
 #define PHYSICS_SYSTEM_H
 
 #include "object_factory.h"
+#include "shader.h"
+#include "types.h"
 #include "world.h"
+#include <vector>
 
 class PhysicsSystem {
 public:
@@ -15,16 +18,13 @@ public:
   void step(World *world, float dt, ObjectFactory *factory);
 
 private:
-  // Applies pairwise gravitational forces and resolves inelastic merge
-  // collisions between all active objects.
-  void applyGravityAndCollisions(World *world, float dt, ObjectFactory *factory);
+  // Dispatch the object gravity+integration compute shader, then read back
+  // any collision pairs and resolve them on the CPU.
+  void dispatchObjects(World *world, float dt);
+  void resolveCollisions(World *world, ObjectFactory *factory);
 
-  // Applies gravity from objects onto particles, advances particle positions,
-  // and expires particles that have exceeded their lifetime.
-  void stepParticles(World *world, float dt);
-
-  // Integrates object positions forward by dt and samples trail points.
-  void integratePositions(World *world, float dt);
+  // Dispatch the particle gravity+integration compute shader.
+  void dispatchParticles(World *world, float dt);
 };
 
 #endif // !PHYSICS_SYSTEM_H

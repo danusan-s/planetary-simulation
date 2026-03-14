@@ -1,0 +1,79 @@
+#version 430 core
+layout(local_size_x = 64) in;
+
+struct GPUBody {
+    vec3  position;
+    float mass;
+    vec3  velocity;
+    float radius;
+    vec3  scale;
+    float alive;
+};
+
+struct GPUParticle {
+    vec3  position;
+    float lifetime;
+    vec3  velocity;
+    float elapsedTime;
+    vec3  scale;
+    float alive;
+};
+
+// Binding 0: body buffer (read-only)
+layout(std430, binding = 0) readonly buffer BodyBuffer {
+    GPUBody bodies[];
+};
+
+// Binding 1: particle buffer (read-write)
+layout(std430, binding = 1) buffer ParticleBuffer {
+    GPUParticle particles[];
+};
+
+uniform float dt;
+uniform float G;
+uniform int   objectCount;
+uniform int   particleCount;
+
+const float GRAVITY_EPSILON    = 0.00001;
+const float PARTICLE_GRAVITY_DELAY = 0.1;
+
+void main() {
+    uint i = gl_GlobalInvocationID.x;
+    if (i >= uint(particleCount)) return;
+
+    GPUParticle p = particles[i];
+    if (p.alive < 0.5) return;
+
+    // Expire check
+    if (p.elapsedTime >= p.lifetime) {
+        p.alive = 0.0;
+        particles[i] = p;
+        return;
+    }
+
+    if (p.elapsedTime > PARTICLE_GRAVITY_DELAY) {
+        for (int j = 0; j < objectCount; j++) {
+            GPUBody body = bodies[j];
+            if (body.alive < 0.5) continue;
+
+            vec3  delta  = body.position - p.position;
+            float distSq = dot(delta, delta) + GRAVITY_EPSILON;
+            float dist   = sqrt(distSq);
+
+            // Deactivate if inside body radius
+            if (dist < body.radius) {
+                p.alive = 0.0;
+                particles[i] = p;
+                return;
+            }
+
+            vec3 dir = delta / dist;
+            p.velocity += dir * (G * body.mass / distSq) * dt;
+        }
+    }
+
+    p.position    += p.velocity * dt;
+    p.elapsedTime += dt;
+
+    particles[i] = p;
+}

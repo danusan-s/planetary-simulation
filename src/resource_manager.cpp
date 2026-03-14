@@ -23,6 +23,13 @@ Shader ResourceManager::LoadShader(const char *vShaderFile,
   return Shaders[name];
 }
 
+Shader ResourceManager::LoadComputeShader(const char *cShaderFile,
+                                          std::string name) {
+  std::cout << "> Loading Compute Shader: " << name << std::endl;
+  Shaders[name] = loadComputeShaderFromFile(cShaderFile);
+  return Shaders[name];
+}
+
 const Shader &ResourceManager::GetShader(std::string name) {
   return Shaders.at(name);
 }
@@ -197,14 +204,10 @@ Cubemap ResourceManager::loadCubemapFromFile(std::vector<const char *> file,
 Model ResourceManager::loadModelFromFile(const char *file) {
   std::string modelData;
   try {
-    // open files
     std::ifstream modelWavefrontObjFile(file);
     std::stringstream wavefrontObjStream;
-    // read file's buffer contents into streams
     wavefrontObjStream << modelWavefrontObjFile.rdbuf();
-    // close file handlers
     modelWavefrontObjFile.close();
-    // convert stream into string
     modelData = wavefrontObjStream.str();
   } catch (const std::exception &e) {
     std::cout << "ERROR::MODEL: Failed to read model files" << std::endl;
@@ -213,4 +216,20 @@ Model ResourceManager::loadModelFromFile(const char *file) {
   Model model;
   model.Generate(modelData);
   return model;
+}
+
+Shader ResourceManager::loadComputeShaderFromFile(const char *cShaderFile) {
+  std::string computeCode;
+  try {
+    std::ifstream cFile(cShaderFile);
+    std::stringstream cStream;
+    cStream << cFile.rdbuf();
+    cFile.close();
+    computeCode = cStream.str();
+  } catch (const std::exception &e) {
+    std::cout << "ERROR::SHADER: Failed to read compute shader file" << std::endl;
+  }
+  Shader shader;
+  shader.CompileCompute(computeCode.c_str());
+  return shader;
 }

@@ -28,6 +28,8 @@ public:
   // loads a geometry shader
   static Shader LoadShader(const char *vShaderFile, const char *fShaderFile,
                            const char *gShaderFile, std::string name);
+  // loads (and generates) a compute shader program from file
+  static Shader LoadComputeShader(const char *cShaderFile, std::string name);
   // retrieves a stored shader
   static const Shader &GetShader(std::string name);
   // loads (and generates) a texture from file
@@ -57,6 +59,8 @@ private:
   static Shader loadShaderFromFile(const char *vShaderFile,
                                    const char *fShaderFile,
                                    const char *gShaderFile = nullptr);
+  // loads and generates a compute shader from file
+  static Shader loadComputeShaderFromFile(const char *cShaderFile);
   // loads a single texture from file
   static Texture2D loadTextureFromFile(const char *file, bool alpha);
   // loads a single texture from file

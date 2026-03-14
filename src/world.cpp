@@ -1,13 +1,55 @@
 #include "world.h"
 #include "types.h"
+#include <cstring>
 
 World::World() {
   camera = Camera(glm::vec3(0.0f, 0.0f, 50.0f));
   sunID = INVALID_ID;
-  sprites.reserve(512);
-  bodies.reserve(512);
-  objects.reserve(512);
-  particles.reserve(5192);
+  sprites.reserve(MAX_OBJECTS);
+  bodies.reserve(MAX_OBJECTS);
+  objects.reserve(MAX_OBJECTS);
+  particles.reserve(MAX_PARTICLES);
+
+  std::memset(trailHeads, 0, sizeof(trailHeads));
+
+  // --- SSBOobjA / SSBOobjB: ping-pong GPUBody buffers ---
+  glGenBuffers(1, &SSBOobjA);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBOobjA);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_OBJECTS * sizeof(GPUBody), nullptr,
+               GL_DYNAMIC_DRAW);
+
+  glGenBuffers(1, &SSBOobjB);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBOobjB);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_OBJECTS * sizeof(GPUBody), nullptr,
+               GL_DYNAMIC_DRAW);
+
+  // --- SSBOtrail: flat vec4 array [MAX_OBJECTS * MAX_TRAIL] ---
+  // Each vec4 stores (x, y, z, 0.0). Using vec4 keeps std430 alignment clean.
+  glGenBuffers(1, &SSBOtrail);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBOtrail);
+  glBufferData(GL_SHADER_STORAGE_BUFFER,
+               MAX_OBJECTS * MAX_TRAIL * sizeof(glm::vec4), nullptr,
+               GL_DYNAMIC_DRAW);
+
+  // --- SSBOcollisions: uint count + CollisionPair[MAX_COLLISIONS] ---
+  glGenBuffers(1, &SSBOcollisions);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBOcollisions);
+  // Layout: [uint count][pad pad pad][CollisionPair * MAX_COLLISIONS]
+  // We put count + 3 padding uints at the front for std430 alignment.
+  glBufferData(GL_SHADER_STORAGE_BUFFER,
+               sizeof(uint32_t) * 4 + MAX_COLLISIONS * sizeof(CollisionPair),
+               nullptr, GL_DYNAMIC_DRAW);
+  // Zero out the count
+  const uint32_t zero = 0;
+  glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(uint32_t), &zero);
+
+  // --- SSBOparticles: GPUParticle[MAX_PARTICLES] ---
+  glGenBuffers(1, &SSBOparticles);
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, SSBOparticles);
+  glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_PARTICLES * sizeof(GPUParticle),
+               nullptr, GL_DYNAMIC_DRAW);
+
+  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 }
 
 World::~World() {
@@ -15,6 +57,11 @@ World::~World() {
     if (objects[i].active)
       DestroyObject(static_cast<ObjectID>(i));
   }
+  glDeleteBuffers(1, &SSBOobjA);
+  glDeleteBuffers(1, &SSBOobjB);
+  glDeleteBuffers(1, &SSBOtrail);
+  glDeleteBuffers(1, &SSBOcollisions);
+  glDeleteBuffers(1, &SSBOparticles);
 }
 
 ObjectID World::CreateObject() {
@@ -93,7 +140,6 @@ ParticleID World::AddParticle(const Particle &particle) {
     particles[id] = particle;
     return id;
   }
-
   particles.push_back(particle);
   return static_cast<ParticleID>(particles.size() - 1);
 }

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/glm.hpp>
 #include <string>
 
 using ShaderID = std::string;
@@ -17,6 +18,36 @@ using ParticleID = uint32_t;
 
 constexpr uint32_t INVALID_ID = UINT32_MAX;
 constexpr int MAX_TRAIL = 512;
+constexpr int MAX_OBJECTS = 512;
+constexpr int MAX_PARTICLES = 1024;
+constexpr int MAX_COLLISIONS = 128;
+
+// GPU-side body layout (std430 — 48 bytes, no padding needed).
+// Indexed by ObjectID; both compute shaders and vertex shaders read this.
+struct GPUBody {
+  glm::vec3 position; // 12
+  float     mass;     //  4
+  glm::vec3 velocity; // 12
+  float     radius;   //  4
+  glm::vec3 scale;    // 12
+  float     alive;    //  4  (1.0 = alive, 0.0 = dead)
+};
+
+// GPU-side particle layout (std430 — 48 bytes, no padding needed).
+struct GPUParticle {
+  glm::vec3 position;    // 12
+  float     lifetime;    //  4
+  glm::vec3 velocity;    // 12
+  float     elapsedTime; //  4
+  glm::vec3 scale;       // 12
+  float     alive;       //  4
+};
+
+// Written by the compute shader when a collision is detected.
+struct CollisionPair {
+  uint32_t survivorIdx;
+  uint32_t destroyedIdx;
+};
 
 struct Vec3 {
   float x;
@@ -127,30 +158,13 @@ struct Particle {
 };
 
 struct Object {
-  Transform transform;
-  Vec3 trail[MAX_TRAIL];
-  int trailHead = 0;
-  GLuint trailVAO = 0, trailVBO = 0;
+  Transform transform; // CPU mirror — updated only on collision response/spawn
   SpriteID spriteID = INVALID_ID;
   BodyID bodyID = INVALID_ID;
-
   bool active = false;
-
-  void updateTrail(const Vec3 &newPosition) {
-    trailHead = (trailHead + 1) % MAX_TRAIL;
-    trail[trailHead] = newPosition;
-  }
 
   void destroyObj() {
     active = false;
-    if (trailVAO != 0) {
-      glDeleteVertexArrays(1, &trailVAO);
-      trailVAO = 0;
-    }
-    if (trailVBO != 0) {
-      glDeleteBuffers(1, &trailVBO);
-      trailVBO = 0;
-    }
   }
 };
 
