@@ -1,4 +1,4 @@
-#version 330 core
+#version 430 core
 
 // Vertex attributes
 layout(location = 0) in vec3 aPos;    // x, y, z
