@@ -117,7 +117,7 @@ void Engine::initImGui() {
   this->guiIO = &ImGui::GetIO();
   ImGui::StyleColorsDark();
   ImGui_ImplGlfw_InitForOpenGL(this->window, true);
-  ImGui_ImplOpenGL3_Init("#version 330 core");
+  ImGui_ImplOpenGL3_Init("#version 430 core");
 }
 
 void Engine::scanPresets() {
