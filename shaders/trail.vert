@@ -1,22 +1,26 @@
 #version 430 core
 
-// Vertex attributes
-layout(location = 0) in vec3 aPos;    // x, y, z
+// Trail positions live in the SSBO — no vertex attribute needed.
+// slot = objectIndex * MAX_TRAIL + gl_VertexID
+layout(std430, binding = 3) readonly buffer TrailBuffer {
+    vec4 trailData[];
+};
 
 uniform mat4 viewProj;
-uniform int trailHead;
-uniform int maxTrail;
+uniform int  objectIndex;
+uniform int  trailHead;
+uniform int  maxTrail;
 
 out float vAlpha;
 
 void main()
 {
-    gl_Position = viewProj * vec4(aPos, 1.0f);
-    
-    // Calculate age of the vertex based on its index and the head index
-    int age = (trailHead - gl_VertexID + maxTrail) % maxTrail;
-    
-    // Calculate alpha: 1.0 for newest (age 0), 0.0 for oldest (age maxTrail - 1)
-    vAlpha = 1.0 - (float(age) / float(maxTrail - 1));
-}
+    int ringIdx = (trailHead + 1 + gl_VertexID) % maxTrail;
+    int slot    = objectIndex * maxTrail + ringIdx;
+    vec3 pos    = trailData[slot].xyz;
 
+    gl_Position = viewProj * vec4(pos, 1.0);
+
+    // vertex 0 = oldest (transparent), vertex (maxTrail-1) = newest (opaque)
+    vAlpha = float(gl_VertexID) / float(maxTrail - 1);
+}

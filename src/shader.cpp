@@ -48,6 +48,23 @@ void Shader::Compile(const char *vertexSource, const char *fragmentSource,
     glDeleteShader(gShader);
 }
 
+void Shader::CompileCompute(const char *computeSource) {
+  unsigned int sCompute;
+  // compute Shader
+  sCompute = glCreateShader(GL_COMPUTE_SHADER);
+  glShaderSource(sCompute, 1, &computeSource, NULL);
+  glCompileShader(sCompute);
+  checkCompileErrors(sCompute, "COMPUTE");
+  // shader program
+  this->ID = glCreateProgram();
+  glAttachShader(this->ID, sCompute);
+  glLinkProgram(this->ID);
+  checkCompileErrors(this->ID, "PROGRAM");
+  // delete the shader as it's linked into our program now and no longer
+  // necessary
+  glDeleteShader(sCompute);
+}
+
 void Shader::SetFloat(const char *name, float value, bool useShader) const {
   if (useShader)
     this->Use();

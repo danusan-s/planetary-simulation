@@ -25,6 +25,9 @@ private:
   std::unique_ptr<SkyboxRenderer> skyboxRenderer;
   std::unique_ptr<ParticleRenderer> particleRenderer;
 
+  // Empty VAO for attribute-less trail draws (positions come from SSBOtrail).
+  GLuint emptyVAO = 0;
+
   void getSunLight(World *world, Vec3 &outPos, Vec3 &outColor);
   void updateViewProjection(World *world);
 };
