@@ -58,8 +58,8 @@ void ObjectFactory::generateRandomPlanet() {
 }
 
 void ObjectFactory::generateRandomSystem(int numPlanets) {
-  spawnSun(Vec3(0.0f), 2.0f, 5000.0f, Vec3(0.0f, 0.0f, 0.0f),
-           Vec3(1.0f, 1.0f, 1.0f));
+  // spawnSun(Vec3(0.0f), 2.0f, 5000.0f, Vec3(0.0f, 0.0f, 0.0f),
+  //          Vec3(1.0f, 1.0f, 1.0f));
   for (int i = 0; i < numPlanets; ++i) {
     generateRandomPlanet();
   }
@@ -202,14 +202,14 @@ ObjectID ObjectFactory::spawnSun(Vec3 position, float radius, float mass,
 
 ParticleID ObjectFactory::spawnParticle(Vec3 position, Vec3 velocity,
                                         float lifetime, float size,
-                                        SpriteID spriteID) {
+                                        Vec3 color) {
   Particle particle;
   particle.transform.position = position;
   particle.transform.scale = Vec3(size);
   particle.velocity = velocity;
   particle.elapsedTime = 0.0f;
   particle.lifetime = lifetime;
-  particle.spriteID = spriteID;
+  particle.color = color;
   particle.active = true;
 
   return this->world->AddParticle(particle);
@@ -218,16 +218,11 @@ ParticleID ObjectFactory::spawnParticle(Vec3 position, Vec3 velocity,
 void ObjectFactory::spawnExplosion(Vec3 origin, Vec3 normal, Object &obj,
                                    int count) {
 
-  Sprite explosionSprite;
-  explosionSprite.modelID = "debris";
-  explosionSprite.textureID = "solid";
-  explosionSprite.shaderID = "diffuse";
-  explosionSprite.color = this->world->sprites[obj.spriteID]
-                              .color; // Use the same color as the object
-  SpriteID explosionSpriteID = this->world->AddSprite(explosionSprite);
+  Vec3 color = this->world->sprites[obj.spriteID].color;
 
   Body &body = this->world->bodies[obj.bodyID];
-  float size = body.radius * 0.3f;
+  static constexpr float MAX_PARTICLE_SIZE = 0.5f;
+  float size = std::min(body.radius * 0.2f, MAX_PARTICLE_SIZE);
   float lifetime = 10.0f;
 
   Vec3 objVel = body.velocity;
@@ -258,7 +253,6 @@ void ObjectFactory::spawnExplosion(Vec3 origin, Vec3 normal, Object &obj,
     float finalLifetime = lifetime * variation;
     float finalSize = size * variation;
 
-    spawnParticle(origin, velocity, finalLifetime, finalSize,
-                  explosionSpriteID);
+    spawnParticle(origin, velocity, finalLifetime, finalSize, color);
   }
 }

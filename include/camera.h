@@ -14,17 +14,17 @@ enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 class Camera {
 public:
   // Default camera values
-  static constexpr float DEFAULT_YAW            = -90.0f;
-  static constexpr float DEFAULT_PITCH          = 0.0f;
-  static constexpr float DEFAULT_MIN_SPEED      = 5.0f;
-  static constexpr float DEFAULT_MAX_SPEED      = 100.0f;
-  static constexpr float DEFAULT_ACCELERATION   = 30.0f;
+  static constexpr float DEFAULT_YAW = -90.0f;
+  static constexpr float DEFAULT_PITCH = 0.0f;
+  static constexpr float DEFAULT_MIN_SPEED = 5.0f;
+  static constexpr float DEFAULT_MAX_SPEED = 100.0f;
+  static constexpr float DEFAULT_ACCELERATION = 30.0f;
   static constexpr float DEFAULT_VERTICAL_SPEED = 10.0f;
-  static constexpr float DEFAULT_SENSITIVITY    = 0.1f;
-  static constexpr float DEFAULT_ZOOM           = 45.0f;
-  static constexpr float DEFAULT_ASPECT_RATIO   = 16.0f / 9.0f;
-  static constexpr float DEFAULT_NEAR_PLANE     = 0.1f;
-  static constexpr float DEFAULT_FAR_PLANE      = 1000.0f;
+  static constexpr float DEFAULT_SENSITIVITY = 0.1f;
+  static constexpr float DEFAULT_ZOOM = 45.0f;
+  static constexpr float DEFAULT_ASPECT_RATIO = 16.0f / 9.0f;
+  static constexpr float DEFAULT_NEAR_PLANE = 0.1f;
+  static constexpr float DEFAULT_FAR_PLANE = 1000.0f;
 
   // camera attributes
   glm::vec3 position;
@@ -48,25 +48,25 @@ public:
   float farPlane;
 
   // constructor with vectors
-  Camera(glm::vec3 pos = glm::vec3(0.0f, 1.0f, 5.0f),
+  Camera(glm::vec3 pos = glm::vec3(0.0f, 0.0f, 5.0f),
          glm::vec3 worldUpVec = glm::vec3(0.0f, 1.0f, 0.0f),
          float yawAngle = DEFAULT_YAW, float pitchAngle = DEFAULT_PITCH)
       : front(glm::vec3(0.0f, 0.0f, -1.0f)), currentSpeed(DEFAULT_MIN_SPEED),
         minSpeed(DEFAULT_MIN_SPEED), maxSpeed(DEFAULT_MAX_SPEED),
-        acceleration(DEFAULT_ACCELERATION), verticalSpeed(DEFAULT_VERTICAL_SPEED),
+        acceleration(DEFAULT_ACCELERATION),
+        verticalSpeed(DEFAULT_VERTICAL_SPEED),
         mouseSensitivity(DEFAULT_SENSITIVITY), zoom(DEFAULT_ZOOM),
         aspectRatio(DEFAULT_ASPECT_RATIO), nearPlane(DEFAULT_NEAR_PLANE),
         farPlane(DEFAULT_FAR_PLANE) {
     position = pos;
-    worldUp  = worldUpVec;
-    yaw      = yawAngle;
-    pitch    = pitchAngle;
+    worldUp = worldUpVec;
+    yaw = yawAngle;
+    pitch = pitchAngle;
     updateCameraVectors();
   }
 
   // constructor with scalar values
-  Camera(float posX, float posY, float posZ,
-         float upX, float upY, float upZ,
+  Camera(float posX, float posY, float posZ, float upX, float upY, float upZ,
          float yawAngle, float pitchAngle)
       : front(glm::vec3(0.0f, 0.0f, -1.0f)), currentSpeed(DEFAULT_MIN_SPEED),
         minSpeed(DEFAULT_MIN_SPEED), maxSpeed(DEFAULT_MAX_SPEED),
@@ -75,9 +75,9 @@ public:
         aspectRatio(DEFAULT_ASPECT_RATIO), nearPlane(DEFAULT_NEAR_PLANE),
         farPlane(DEFAULT_FAR_PLANE) {
     position = glm::vec3(posX, posY, posZ);
-    worldUp  = glm::vec3(upX, upY, upZ);
-    yaw      = yawAngle;
-    pitch    = pitchAngle;
+    worldUp = glm::vec3(upX, upY, upZ);
+    yaw = yawAngle;
+    pitch = pitchAngle;
     updateCameraVectors();
   }
 
@@ -106,7 +106,7 @@ public:
   // parameter in the form of camera defined ENUM (to abstract it from windowing
   // systems)
   void ProcessKeyboard(Camera_Movement direction, float deltaTime) {
-    float velocity         = currentSpeed * deltaTime;
+    float velocity = currentSpeed * deltaTime;
     float verticalVelocity = verticalSpeed * deltaTime;
     if (direction == FORWARD)
       position += front * velocity;
@@ -129,7 +129,7 @@ public:
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
 
-    yaw   += xoffset;
+    yaw += xoffset;
     pitch += yoffset;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
@@ -158,13 +158,13 @@ private:
   // calculates the front vector from the Camera's (updated) Euler Angles
   void updateCameraVectors() {
     glm::vec3 f;
-    f.x   = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    f.y   = sin(glm::radians(pitch));
-    f.z   = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    f.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    f.y = sin(glm::radians(pitch));
+    f.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     front = glm::normalize(f);
     // also re-calculate the right and up vectors
     right = glm::normalize(glm::cross(front, worldUp));
-    up    = glm::normalize(glm::cross(right, front));
+    up = glm::normalize(glm::cross(right, front));
   }
 };
 #endif

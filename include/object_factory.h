@@ -10,7 +10,7 @@ private:
   float minPlanetMass = 1.0f;
   float maxPlanetMass = 1000.0f;
   float velocityRange = 5.0f;
-  float positionRange = 100.0f;
+  float positionRange = 200.0f;
   float radiusScale = 0.2f;
 
 public:
@@ -23,7 +23,7 @@ public:
   ObjectID spawnSun(Vec3 position, float radius, float mass, Vec3 initialSpeed,
                     Vec3 color);
   ParticleID spawnParticle(Vec3 position, Vec3 velocity, float lifetime,
-                           float size, SpriteID spriteID);
+                           float size, Vec3 color);
   void spawnExplosion(Vec3 origin, Vec3 normal, Object &obj, int count);
 };
 

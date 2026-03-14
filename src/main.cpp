@@ -20,6 +20,9 @@ const unsigned int INIT_SCREEN_WIDTH = 1920;
 // The height of the screen
 const unsigned int INIT_SCREEN_HEIGHT = 1080;
 
+float loadTime = 3.0f;
+bool loadingComplete = false;
+
 Engine engineObj = Engine();
 
 int main(int argc, char *argv[]) {
@@ -86,7 +89,13 @@ int main(int argc, char *argv[]) {
     // -------------
     engineObj.ProcessInput(deltaTime);
 
-    while (accumulatedTime >= timeStep) {
+    if (!loadingComplete && accumulatedTime > loadTime) {
+      loadingComplete = true;
+      accumulatedTime = 0.0f; // reset accumulated time after loading
+      std::cout << "Loading complete, starting simulation" << std::endl;
+    }
+
+    while (loadingComplete && accumulatedTime >= timeStep) {
       // compute physics
       // ---------------
       engineObj.Update(timeStep);

@@ -23,6 +23,13 @@ void Engine::Shutdown() {
     std::cout << "ImGui Contexts successfully deleted" << std::endl;
   }
 
+  std::cout << "Releasing subsystems (GL cleanup)" << std::endl;
+  renderer.reset(); // ~RenderSystem -> ~SkyboxRenderer / ~ParticleRenderer
+  world.reset();    // ~World -> DestroyObject -> glDeleteBuffers (trails)
+  objectFactory.reset();
+  physics.reset();
+  std::cout << "Subsystems released" << std::endl;
+
   std::cout << "Attempting to clear ResourceManager" << std::endl;
   ResourceManager::Clear();
   std::cout << "ResourceManager successfully cleared" << std::endl;
@@ -42,6 +49,10 @@ void Engine::loadShaders() {
   ResourceManager::LoadShader(
       Utils::GetAssetPath("shaders/skybox.vert").c_str(),
       Utils::GetAssetPath("shaders/skybox.frag").c_str(), nullptr, "skybox");
+  ResourceManager::LoadShader(
+      Utils::GetAssetPath("shaders/particle.vert").c_str(),
+      Utils::GetAssetPath("shaders/particle.frag").c_str(), nullptr,
+      "particle");
 }
 
 void Engine::loadTextures() {
@@ -101,11 +112,11 @@ void Engine::initSystems() {
 void Engine::initScene() {
   std::cout << "Creating Objects" << std::endl;
   // To use presets:
-  this->physics->G = this->objectFactory->parsePreset(
-      Utils::GetAssetPath("presets/empty.txt").c_str());
+  // this->physics->G = this->objectFactory->parsePreset(
+  //     Utils::GetAssetPath("presets/empty.txt").c_str());
 
   // To use random generation:
-  // this->objectFactory->generateRandomSystem(30);
+  this->objectFactory->generateRandomSystem(200);
 }
 
 void Engine::initImGui() {

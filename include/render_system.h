@@ -2,6 +2,7 @@
 #define RENDER_SYSTEM_H
 
 #include "model_renderer.h"
+#include "particle_renderer.h"
 #include "skybox_renderer.h"
 #include "world.h"
 #include <glm/glm.hpp>
@@ -22,10 +23,9 @@ public:
 private:
   std::unique_ptr<ModelRenderer> modelRenderer;
   std::unique_ptr<SkyboxRenderer> skyboxRenderer;
+  std::unique_ptr<ParticleRenderer> particleRenderer;
 
   void getSunLight(World *world, Vec3 &outPos, Vec3 &outColor);
-  glm::mat4 velocityStretchMatrix(glm::vec3 baseScale, Vec3 velocity,
-                                  float refSpeed);
   void updateViewProjection(World *world);
 };
 

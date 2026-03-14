@@ -3,50 +3,13 @@
 #include "resource_manager.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
-
-// Speed (units/s) at which particle stretch saturates at its maximum (2x).
-static constexpr float PARTICLE_STRETCH_REF_SPEED = 10.0f;
 
 RenderSystem::RenderSystem()
     : modelRenderer(std::make_unique<ModelRenderer>()),
-      skyboxRenderer(std::make_unique<SkyboxRenderer>()) {
-}
+      skyboxRenderer(std::make_unique<SkyboxRenderer>()),
+      particleRenderer(std::make_unique<ParticleRenderer>()) {}
 
 RenderSystem::~RenderSystem() = default;
-
-// Stretches baseScale along the velocity direction.
-// stretch = 1 + clamp(speed/refSpeed, 0, 1)  -> range [1, 2]
-// Perpendicular axes shrink by 1/sqrt(stretch) to conserve volume.
-// Returns a combined rotation+scale matrix ready to be appended after
-// translate.
-glm::mat4 RenderSystem::velocityStretchMatrix(glm::vec3 baseScale,
-                                              Vec3 velocity, float refSpeed) {
-  glm::vec3 vel(velocity.x, velocity.y, velocity.z);
-  float speed = glm::length(vel);
-
-  if (speed < 1e-4f)
-    return glm::scale(glm::mat4(1.0f), baseScale);
-
-  float t = glm::clamp(speed / refSpeed, 0.0f, 1.0f);
-  float stretch = 1.0f + t;                 // [1, 2]
-  float squash = 1.0f / std::sqrt(stretch); // volume-preserving
-
-  glm::vec3 stretchedScale = baseScale * glm::vec3(squash, squash, stretch);
-
-  // Rotate so the model's +Z axis aligns with the velocity direction
-  glm::vec3 dir = glm::normalize(vel);
-  glm::vec3 refDir = glm::vec3(0.0f, 0.0f, 1.0f);
-  glm::quat rot;
-  if (glm::abs(glm::dot(dir, refDir)) > 0.9999f) {
-    // Nearly parallel or anti-parallel — use a safe fallback rotation
-    rot = glm::rotation(refDir, dir);
-  } else {
-    rot = glm::rotation(refDir, dir);
-  }
-
-  return glm::toMat4(rot) * glm::scale(glm::mat4(1.0f), stretchedScale);
-}
 
 void RenderSystem::updateViewProjection(World *world) {
   this->viewProj =
@@ -118,28 +81,8 @@ void RenderSystem::renderParticles(World *world) {
   Vec3 lightPos, lightColor;
   getSunLight(world, lightPos, lightColor);
 
-  for (const auto &particle : world->particles) {
-    if (!particle.active || particle.spriteID == INVALID_ID ||
-        particle.spriteID >= world->sprites.size())
-      continue;
-
-    const Sprite &sprite = world->sprites[particle.spriteID];
-    const Texture2D &texture = ResourceManager::GetTexture(sprite.textureID);
-    const Model &model = ResourceManager::GetModel(sprite.modelID);
-    const Shader &particleShader = ResourceManager::GetShader(sprite.shaderID);
-    const glm::vec3 color = sprite.color;
-
-    glm::mat4 modelMat = glm::mat4(1.0f);
-    modelMat = glm::translate(
-        modelMat, static_cast<glm::vec3>(particle.transform.position));
-    modelMat *=
-        velocityStretchMatrix(static_cast<glm::vec3>(particle.transform.scale),
-                              particle.velocity, PARTICLE_STRETCH_REF_SPEED);
-
-    particleShader.SetMatrix4("viewProj", this->viewProj, true);
-
-    this->modelRenderer->renderModel(modelMat, world->camera, model, texture,
-                                     particleShader, color, lightPos,
-                                     lightColor);
-  }
+  this->particleRenderer->render(this->viewProj, world->camera,
+                                 world->particles,
+                                 static_cast<glm::vec3>(lightPos),
+                                 static_cast<glm::vec3>(lightColor));
 }

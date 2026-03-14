@@ -1,17 +1,17 @@
 #include "texture.h"
 
 Texture2D::Texture2D()
-    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB),
+    : ID(0), Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB),
       Wrap_S(GL_CLAMP_TO_EDGE), Wrap_T(GL_CLAMP_TO_EDGE),
-      Filter_Min(GL_LINEAR_MIPMAP_LINEAR), Filter_Max(GL_LINEAR) {
-  glGenTextures(1, &this->ID);
-}
+      Filter_Min(GL_LINEAR_MIPMAP_LINEAR), Filter_Max(GL_LINEAR) {}
 
 void Texture2D::Generate(unsigned int width, unsigned int height,
                          unsigned char *data) {
   this->Width = width;
   this->Height = height;
   // create Texture
+  if (this->ID == 0)
+    glGenTextures(1, &this->ID);
   // Bind the texture
   glBindTexture(GL_TEXTURE_2D, this->ID);
 

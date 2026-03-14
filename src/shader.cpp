@@ -8,6 +8,12 @@ void Shader::Use() const {
 
 void Shader::Compile(const char *vertexSource, const char *fragmentSource,
                      const char *geometrySource) {
+  // Delete any previously compiled program to avoid leaking GL resources.
+  if (this->ID != 0) {
+    glDeleteProgram(this->ID);
+    this->ID = 0;
+  }
+
   unsigned int sVertex, sFragment, gShader;
   // vertex Shader
   sVertex = glCreateShader(GL_VERTEX_SHADER);

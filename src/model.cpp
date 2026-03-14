@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-Model::Model() {
+Model::Model() : VAO(0), VBO(0), EBO(0) {
 }
 
 void Model::Generate(const std::string &data) {

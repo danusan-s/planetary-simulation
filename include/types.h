@@ -93,10 +93,11 @@ struct Sprite {
   ShaderID shaderID;
   ModelID modelID;
   Vec3 color;
+  bool active;
 
   Sprite()
       : textureID(""), shaderID(""), modelID(""),
-        color(Vec3(1.0f, 1.0f, 1.0f)) {
+        color(Vec3(1.0f, 1.0f, 1.0f)), active(false) {
   }
 };
 
@@ -104,23 +105,24 @@ struct Body {
   Vec3 velocity;
   float mass;
   float radius; // Physics collision/gravity radius (independent of render scale)
+  bool active;
 
-  Body() : velocity(Vec3()), mass(1.0f), radius(1.0f) {
+  Body() : velocity(Vec3()), mass(1.0f), radius(1.0f), active(false) {
   }
 };
 
 struct Particle {
   Transform transform;
   Vec3 velocity;
+  Vec3 color;
   float lifetime;
   float elapsedTime;
-  SpriteID spriteID;
 
   bool active;
 
   Particle()
-      : transform(Transform()), velocity(Vec3()), lifetime(0.0f),
-        elapsedTime(0.0f), spriteID(INVALID_ID), active(false) {
+      : transform(Transform()), velocity(Vec3()), color(Vec3(1.0f)),
+        lifetime(0.0f), elapsedTime(0.0f), active(false) {
   }
 };
 

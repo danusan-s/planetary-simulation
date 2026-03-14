@@ -18,7 +18,7 @@ static constexpr float MIN_SPEED_FOR_TRAIL = 0.1f;
 static constexpr float TRAIL_RATE_DIVISOR = 20.0f;
 
 // Number of particles spawned per collision explosion.
-static constexpr int EXPLOSION_PARTICLE_COUNT = 50;
+static constexpr int EXPLOSION_PARTICLE_COUNT = 20;
 
 PhysicsSystem::PhysicsSystem() : G(1.0f) {
 }
@@ -68,12 +68,17 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
                            world->sprites[objB.spriteID].color * bodyB.mass) /
                           totalMass;
 
-        if (objA.bodyID == world->sunID || objB.bodyID == world->sunID) {
-          finalColor =
-              world->sprites[world->sunID].color; // Sun's color dominates
+        bool isSunCollision =
+            (world->sunID != INVALID_ID) &&
+            (static_cast<ObjectID>(i) == world->sunID ||
+             static_cast<ObjectID>(j) == world->sunID);
+        if (isSunCollision) {
+          const Object &sun = world->objects[world->sunID];
+          finalColor = world->sprites[sun.spriteID].color;
         }
 
-        if (objA.bodyID == world->sunID || bodyA.mass >= bodyB.mass) {
+        if (static_cast<ObjectID>(i) == world->sunID ||
+            bodyA.mass >= bodyB.mass) {
           world->sprites[objA.spriteID].color = finalColor;
           bodyA.velocity = finalVelocity;
           bodyA.mass = totalMass;
@@ -81,7 +86,7 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
           objA.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objA.transform.position + normal * newRadius,
                                   normal, objB, EXPLOSION_PARTICLE_COUNT);
-          objB.destroyObj();
+          world->DestroyObject(static_cast<ObjectID>(j));
         } else {
           normal =
               normal * (-1); // Flip normal to point from B to A for explosion
@@ -92,7 +97,7 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
           objB.transform.scale = Vec3(newRadius);
           factory->spawnExplosion(objB.transform.position + normal * newRadius,
                                   normal, objA, EXPLOSION_PARTICLE_COUNT);
-          objA.destroyObj();
+          world->DestroyObject(static_cast<ObjectID>(i));
           break; // objA is destroyed, stop checking it against other objects
         }
         continue;
@@ -106,10 +111,12 @@ void PhysicsSystem::applyGravityAndCollisions(World *world, float dt,
 }
 
 void PhysicsSystem::stepParticles(World *world, float dt) {
-  for (auto &particle : world->particles) {
+  for (size_t pi = 0; pi < world->particles.size(); pi++) {
+    Particle &particle = world->particles[pi];
     if (!particle.active)
       continue;
 
+    bool absorbed = false;
     if (particle.elapsedTime > PARTICLE_GRAVITY_DELAY) {
       for (const auto &obj : world->objects) {
         if (!obj.active || obj.bodyID == INVALID_ID ||
@@ -122,7 +129,8 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
         float dist = std::sqrt(dist_sq);
 
         if (dist < body.radius) {
-          particle.active = false;
+          world->DeactivateParticle(static_cast<ParticleID>(pi));
+          absorbed = true;
           break;
         }
 
@@ -130,14 +138,14 @@ void PhysicsSystem::stepParticles(World *world, float dt) {
         particle.velocity += direction * (G * body.mass / dist_sq) * dt;
       }
 
-      if (!particle.active)
+      if (absorbed)
         continue;
     }
 
     particle.transform.position += particle.velocity * dt;
     particle.elapsedTime += dt;
     if (particle.lifetime - particle.elapsedTime <= 0.0f) {
-      particle.active = false;
+      world->DeactivateParticle(static_cast<ParticleID>(pi));
     }
   }
 }

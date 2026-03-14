@@ -3,11 +3,9 @@
 #include <iostream>
 
 Cubemap::Cubemap()
-    : Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB),
+    : ID(0), Width(0), Height(0), Internal_Format(GL_RGB), Image_Format(GL_RGB),
       Wrap_S(GL_CLAMP_TO_EDGE), Wrap_T(GL_CLAMP_TO_EDGE),
-      Wrap_R(GL_CLAMP_TO_EDGE), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR) {
-  glGenTextures(1, &this->ID);
-}
+      Wrap_R(GL_CLAMP_TO_EDGE), Filter_Min(GL_LINEAR), Filter_Max(GL_LINEAR) {}
 
 void Cubemap::Generate(std::vector<unsigned int> width,
                        std::vector<unsigned int> height,
@@ -21,6 +19,8 @@ void Cubemap::Generate(std::vector<unsigned int> width,
   }
 
   // create Texture
+  if (this->ID == 0)
+    glGenTextures(1, &this->ID);
   // Bind the texture
   glBindTexture(GL_TEXTURE_CUBE_MAP, this->ID);
 
