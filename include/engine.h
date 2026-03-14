@@ -11,6 +11,12 @@
 #include "world.h"
 #include <GLFW/glfw3.h>
 #include <memory>
+#include <string>
+#include <vector>
+
+enum class EngineState { Menu, Loading, Running };
+
+enum class SceneMode { Random, Preset };
 
 // Game holds all game-related state and functionality.
 // Combines all game-related data into a single class for
@@ -25,6 +31,14 @@ private:
     Vec3 color = Vec3(1.0f);
   };
 
+  struct MenuConfig {
+    SceneMode mode = SceneMode::Random;
+    int planetCount = 100;
+    int selectedPreset = 0;
+  };
+
+  static constexpr float LOAD_DELAY = 3.0f;
+
   std::unique_ptr<World> world;
   std::unique_ptr<PhysicsSystem> physics;
   std::unique_ptr<RenderSystem> renderer;
@@ -33,10 +47,16 @@ private:
   SpawnParams spawnParams;
   GLFWwindow *window = nullptr;
 
+  EngineState state = EngineState::Menu;
+  MenuConfig menuConfig;
+  std::vector<std::string> presetFiles;
+  float loadTimer = 0.0f;
+
 public:
   // game state
   InputState inputState;
   Viewport viewport;
+  float timeScale = 1.0f;
 
   // constructor/destructor
   Engine();
@@ -51,13 +71,21 @@ public:
   void Update(float timeStep);
   void Render();
 
+  bool IsRunning() const {
+    return state == EngineState::Running;
+  }
+
 private:
   void loadShaders();
   void loadTextures();
   void loadModels();
   void initSystems();
-  void initScene();
   void initImGui();
+  void scanPresets();
+  void startScene();
+  void returnToMenu();
+  void renderMenu();
+  void renderHUD();
 };
 
 #endif

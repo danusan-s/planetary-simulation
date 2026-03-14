@@ -16,15 +16,14 @@ public:
   // Default camera values
   static constexpr float DEFAULT_YAW = -90.0f;
   static constexpr float DEFAULT_PITCH = 0.0f;
-  static constexpr float DEFAULT_MIN_SPEED = 5.0f;
-  static constexpr float DEFAULT_MAX_SPEED = 100.0f;
-  static constexpr float DEFAULT_ACCELERATION = 30.0f;
-  static constexpr float DEFAULT_VERTICAL_SPEED = 10.0f;
+  static constexpr float DEFAULT_MIN_SPEED = 10.0f;
+  static constexpr float DEFAULT_MAX_SPEED = 200.0f;
+  static constexpr float DEFAULT_ACCEL_TIME = 2.0f;
   static constexpr float DEFAULT_SENSITIVITY = 0.1f;
   static constexpr float DEFAULT_ZOOM = 45.0f;
   static constexpr float DEFAULT_ASPECT_RATIO = 16.0f / 9.0f;
   static constexpr float DEFAULT_NEAR_PLANE = 0.1f;
-  static constexpr float DEFAULT_FAR_PLANE = 1000.0f;
+  static constexpr float DEFAULT_FAR_PLANE = 10000.0f;
 
   // camera attributes
   glm::vec3 position;
@@ -39,8 +38,7 @@ public:
   float currentSpeed;
   float minSpeed;
   float maxSpeed;
-  float acceleration;
-  float verticalSpeed;
+  float accelTime;
   float mouseSensitivity;
   float zoom;
   float aspectRatio;
@@ -53,11 +51,9 @@ public:
          float yawAngle = DEFAULT_YAW, float pitchAngle = DEFAULT_PITCH)
       : front(glm::vec3(0.0f, 0.0f, -1.0f)), currentSpeed(DEFAULT_MIN_SPEED),
         minSpeed(DEFAULT_MIN_SPEED), maxSpeed(DEFAULT_MAX_SPEED),
-        acceleration(DEFAULT_ACCELERATION),
-        verticalSpeed(DEFAULT_VERTICAL_SPEED),
-        mouseSensitivity(DEFAULT_SENSITIVITY), zoom(DEFAULT_ZOOM),
-        aspectRatio(DEFAULT_ASPECT_RATIO), nearPlane(DEFAULT_NEAR_PLANE),
-        farPlane(DEFAULT_FAR_PLANE) {
+        accelTime(DEFAULT_ACCEL_TIME), mouseSensitivity(DEFAULT_SENSITIVITY),
+        zoom(DEFAULT_ZOOM), aspectRatio(DEFAULT_ASPECT_RATIO),
+        nearPlane(DEFAULT_NEAR_PLANE), farPlane(DEFAULT_FAR_PLANE) {
     position = pos;
     worldUp = worldUpVec;
     yaw = yawAngle;
@@ -70,10 +66,9 @@ public:
          float yawAngle, float pitchAngle)
       : front(glm::vec3(0.0f, 0.0f, -1.0f)), currentSpeed(DEFAULT_MIN_SPEED),
         minSpeed(DEFAULT_MIN_SPEED), maxSpeed(DEFAULT_MAX_SPEED),
-        acceleration(DEFAULT_ACCELERATION),
-        mouseSensitivity(DEFAULT_SENSITIVITY), zoom(DEFAULT_ZOOM),
-        aspectRatio(DEFAULT_ASPECT_RATIO), nearPlane(DEFAULT_NEAR_PLANE),
-        farPlane(DEFAULT_FAR_PLANE) {
+        accelTime(DEFAULT_ACCEL_TIME), mouseSensitivity(DEFAULT_SENSITIVITY),
+        zoom(DEFAULT_ZOOM), aspectRatio(DEFAULT_ASPECT_RATIO),
+        nearPlane(DEFAULT_NEAR_PLANE), farPlane(DEFAULT_FAR_PLANE) {
     position = glm::vec3(posX, posY, posZ);
     worldUp = glm::vec3(upX, upY, upZ);
     yaw = yawAngle;
@@ -93,7 +88,8 @@ public:
 
   void UpdateSpeed(bool isMoving, float deltaTime) {
     if (isMoving) {
-      currentSpeed += acceleration * deltaTime;
+      float accel = maxSpeed / accelTime;
+      currentSpeed += accel * deltaTime;
       if (currentSpeed > maxSpeed) {
         currentSpeed = maxSpeed;
       }
@@ -107,7 +103,6 @@ public:
   // systems)
   void ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = currentSpeed * deltaTime;
-    float verticalVelocity = verticalSpeed * deltaTime;
     if (direction == FORWARD)
       position += front * velocity;
     if (direction == BACKWARD)
@@ -117,9 +112,9 @@ public:
     if (direction == RIGHT)
       position += right * velocity;
     if (direction == UP)
-      position += glm::vec3(0.0f, 1.0f, 0.0f) * verticalVelocity;
+      position += glm::vec3(0.0f, 1.0f, 0.0f) * velocity;
     if (direction == DOWN)
-      position -= glm::vec3(0.0f, 1.0f, 0.0f) * verticalVelocity;
+      position -= glm::vec3(0.0f, 1.0f, 0.0f) * velocity;
   }
 
   // processes input received from a mouse input system. Expects the offset

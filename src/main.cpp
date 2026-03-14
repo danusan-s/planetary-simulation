@@ -20,9 +20,6 @@ const unsigned int INIT_SCREEN_WIDTH = 1920;
 // The height of the screen
 const unsigned int INIT_SCREEN_HEIGHT = 1080;
 
-float loadTime = 3.0f;
-bool loadingComplete = false;
-
 Engine engineObj = Engine();
 
 int main(int argc, char *argv[]) {
@@ -57,7 +54,7 @@ int main(int argc, char *argv[]) {
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetCursorPosCallback(window, mouse_callback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
   engineObj.viewport =
       letterbox_viewport(INIT_SCREEN_WIDTH, INIT_SCREEN_HEIGHT);
@@ -81,7 +78,7 @@ int main(int argc, char *argv[]) {
     // --------------------
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
-    accumulatedTime += deltaTime;
+    accumulatedTime += deltaTime * engineObj.timeScale;
     lastFrame = currentFrame;
     glfwPollEvents();
 
@@ -89,15 +86,7 @@ int main(int argc, char *argv[]) {
     // -------------
     engineObj.ProcessInput(deltaTime);
 
-    if (!loadingComplete && accumulatedTime > loadTime) {
-      loadingComplete = true;
-      accumulatedTime = 0.0f; // reset accumulated time after loading
-      std::cout << "Loading complete, starting simulation" << std::endl;
-    }
-
-    while (loadingComplete && accumulatedTime >= timeStep) {
-      // compute physics
-      // ---------------
+    while (accumulatedTime >= timeStep) {
       engineObj.Update(timeStep);
       accumulatedTime -= timeStep;
     }

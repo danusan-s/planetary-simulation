@@ -6,6 +6,8 @@
 #include "resource_manager.h"
 #include "utils.h"
 #include <GLFW/glfw3.h>
+#include <algorithm>
+#include <filesystem>
 #include <iostream>
 
 Engine::Engine() = default;
@@ -109,16 +111,6 @@ void Engine::initSystems() {
   this->objectFactory = std::make_unique<ObjectFactory>(this->world.get());
 }
 
-void Engine::initScene() {
-  std::cout << "Creating Objects" << std::endl;
-  // To use presets:
-  // this->physics->G = this->objectFactory->parsePreset(
-  //     Utils::GetAssetPath("presets/empty.txt").c_str());
-
-  // To use random generation:
-  this->objectFactory->generateRandomSystem(200);
-}
-
 void Engine::initImGui() {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -128,23 +120,106 @@ void Engine::initImGui() {
   ImGui_ImplOpenGL3_Init("#version 330 core");
 }
 
+void Engine::scanPresets() {
+  std::string presetsDir = Utils::GetAssetPath("presets");
+  presetFiles.clear();
+
+  try {
+    for (const auto &entry : std::filesystem::directory_iterator(presetsDir)) {
+      if (entry.is_regular_file() && entry.path().extension() == ".txt") {
+        presetFiles.push_back(entry.path().filename().string());
+      }
+    }
+  } catch (const std::filesystem::filesystem_error &e) {
+    std::cerr << "Warning: could not scan presets directory: " << e.what()
+              << std::endl;
+  }
+
+  std::sort(presetFiles.begin(), presetFiles.end());
+
+  if (menuConfig.selectedPreset >= static_cast<int>(presetFiles.size()))
+    menuConfig.selectedPreset = 0;
+}
+
+void Engine::startScene() {
+  std::cout << "Creating Objects" << std::endl;
+
+  switch (menuConfig.mode) {
+    case SceneMode::Random:
+      this->objectFactory->generateRandomSystem(menuConfig.planetCount);
+      break;
+    case SceneMode::Preset:
+      if (menuConfig.selectedPreset < static_cast<int>(presetFiles.size())) {
+        std::string path = Utils::GetAssetPath(
+            "presets/" + presetFiles[menuConfig.selectedPreset]);
+        this->physics->G = this->objectFactory->parsePreset(path.c_str());
+      }
+      break;
+  }
+
+  state = EngineState::Loading;
+  loadTimer = 0.0f;
+}
+
+void Engine::returnToMenu() {
+  objectFactory.reset();
+  world.reset();
+  physics.reset();
+  renderer.reset();
+
+  initSystems();
+
+  scanPresets();
+  state = EngineState::Menu;
+  loadTimer = 0.0f;
+  timeScale = 1.0f;
+  spawnParams = SpawnParams{};
+}
+
 void Engine::Init(GLFWwindow *win) {
   this->window = win;
   initSystems();
   loadShaders();
   loadTextures();
   loadModels();
-  initScene();
+  scanPresets();
   initImGui();
+  state = EngineState::Menu;
 }
 
 void Engine::Update(float timeStep) {
+  if (state == EngineState::Loading) {
+    loadTimer += timeStep;
+    if (loadTimer >= LOAD_DELAY) {
+      state = EngineState::Running;
+      std::cout << "Loading complete, starting simulation" << std::endl;
+    }
+    return;
+  }
+
+  if (state != EngineState::Running)
+    return;
+
   this->physics->step(this->world.get(), timeStep, this->objectFactory.get());
 }
 
 void Engine::ProcessInput(float deltaTime) {
   if (this->inputState.keys[GLFW_KEY_ESCAPE]) {
-    glfwSetWindowShouldClose(this->window, true);
+    if (state == EngineState::Menu) {
+      glfwSetWindowShouldClose(this->window, true);
+    } else {
+      returnToMenu();
+      this->inputState.keys[GLFW_KEY_ESCAPE] = false; // consume the key
+      return;
+    }
+  }
+
+  // In Menu, keep cursor free for ImGui interaction
+  if (state == EngineState::Menu) {
+    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    this->inputState.lastMouseX = this->inputState.mouseX;
+    this->inputState.lastMouseY = this->inputState.mouseY;
+    return;
   }
 
   static bool capsLockPressed = false;
@@ -201,25 +276,120 @@ void Engine::ProcessInput(float deltaTime) {
   this->inputState.lastMouseY = this->inputState.mouseY;
 }
 
-void Engine::Render() {
-  ImGui_ImplOpenGL3_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-  this->renderer->renderWorld(this->world.get());
+void Engine::renderMenu() {
+  ImVec2 displaySize = ImGui::GetIO().DisplaySize;
 
-  ImGui::Begin("Debug Info");
+  // Full-screen background window
+  ImGui::SetNextWindowPos(ImVec2(0, 0));
+  ImGui::SetNextWindowSize(displaySize);
+  ImGui::Begin("##MenuBackground", nullptr,
+               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                   ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                   ImGuiWindowFlags_NoCollapse |
+                   ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+  // Center a panel in the middle of the screen
+  float panelWidth = 420.0f;
+  float panelHeight = 380.0f;
+  float panelX = (displaySize.x - panelWidth) * 0.5f;
+  float panelY = (displaySize.y - panelHeight) * 0.5f;
+
+  ImGui::SetCursorPos(ImVec2(panelX, panelY));
+  ImGui::BeginChild("##MenuPanel", ImVec2(panelWidth, panelHeight), true);
+
+  // Title
+  const char *title = "Planetary Simulation";
+  float titleWidth = ImGui::CalcTextSize(title).x;
+  ImGui::SetCursorPosX((panelWidth - titleWidth) * 0.5f);
+  ImGui::TextUnformatted(title);
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  // Scene mode selection
+  int mode = static_cast<int>(menuConfig.mode);
+  ImGui::RadioButton("Random Generation", &mode, 0);
+  ImGui::SameLine();
+  ImGui::RadioButton("Load Preset", &mode, 1);
+  menuConfig.mode = static_cast<SceneMode>(mode);
+
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  // Mode-specific options
+  if (menuConfig.mode == SceneMode::Random) {
+    ImGui::DragInt("Planet Count", &menuConfig.planetCount, 1.0f, 1, 500);
+  } else {
+    if (presetFiles.empty()) {
+      ImGui::TextWrapped("No preset files found in presets/ directory.");
+    } else {
+      ImGui::Text("Select a preset:");
+      ImGui::BeginChild("##PresetList", ImVec2(0, 150), true);
+      for (int i = 0; i < static_cast<int>(presetFiles.size()); i++) {
+        bool selected = (menuConfig.selectedPreset == i);
+        if (ImGui::Selectable(presetFiles[i].c_str(), selected)) {
+          menuConfig.selectedPreset = i;
+        }
+      }
+      ImGui::EndChild();
+    }
+  }
+
+  ImGui::Spacing();
+  ImGui::Separator();
+  ImGui::Spacing();
+
+  // Start button — centered
+  float buttonWidth = 200.0f;
+  float buttonHeight = 30.0f;
+  ImGui::SetCursorPosX((panelWidth - buttonWidth) * 0.5f);
+
+  bool canStart = true;
+  if (menuConfig.mode == SceneMode::Preset && presetFiles.empty())
+    canStart = false;
+
+  if (!canStart)
+    ImGui::BeginDisabled();
+
+  if (ImGui::Button("Start Simulation", ImVec2(buttonWidth, buttonHeight))) {
+    startScene();
+  }
+
+  if (!canStart)
+    ImGui::EndDisabled();
+
+  ImGui::EndChild();
+  ImGui::End();
+}
+
+void Engine::renderHUD() {
+  ImGui::Begin("Controls");
+
+  // -- Debug info --
   ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
   ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", world->camera.position.x,
               world->camera.position.y, world->camera.position.z);
-  ImGui::End();
 
-  ImGui::Begin("Spawner");
+  ImGui::Separator();
+
+  // -- Simulation speed --
+  ImGui::InputFloat("Time Scale", &timeScale, 0.01f, 0.1f, "%.2f");
+  if (timeScale < 0.0f) timeScale = 0.0f;
+  if (timeScale > 5.0f) timeScale = 5.0f;
+
+  // -- Camera speed --
+  ImGui::InputFloat("Camera Speed", &world->camera.maxSpeed, 10.0f, 50.0f, "%.0f");
+  if (world->camera.maxSpeed < 1.0f) world->camera.maxSpeed = 1.0f;
+
+  ImGui::Separator();
+
+  // -- Spawner --
   if (ImGui::Button("Spawn Random Planet")) {
     this->objectFactory->generateRandomPlanet();
   }
 
-  ImGui::SliderFloat("Mass", &spawnParams.mass, 1.0f, 1000.0f);
-  ImGui::SliderFloat("Radius", &spawnParams.radius, 0.1f, 10.0f);
+  ImGui::DragFloat("Mass", &spawnParams.mass, 1.0f, 1.0f, 1000.0f);
+  ImGui::DragFloat("Radius", &spawnParams.radius, 0.01f, 0.1f, 10.0f);
   ImGui::InputFloat3("Position", &spawnParams.position.x);
   ImGui::InputFloat3("Initial Speed", &spawnParams.initialSpeed.x);
   ImGui::ColorEdit3("Color", &spawnParams.color.x);
@@ -228,7 +398,29 @@ void Engine::Render() {
                                      spawnParams.mass, spawnParams.initialSpeed,
                                      spawnParams.color, "solid");
   }
+
+  ImGui::Separator();
+
+  // -- Navigation --
+  if (ImGui::Button("Back to Menu")) {
+    returnToMenu();
+  }
+
   ImGui::End();
+}
+
+void Engine::Render() {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGui::NewFrame();
+
+  if (state == EngineState::Menu) {
+    renderMenu();
+  } else {
+    // Loading and Running both render the world
+    this->renderer->renderWorld(this->world.get());
+    renderHUD();
+  }
 
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
