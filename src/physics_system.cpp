@@ -62,7 +62,8 @@ void PhysicsSystem::dispatchObjects(World *world, float dt) {
   checkGL("dispatchObjects:trailHeads");
 
   int groups = (objectCount + 63) / 64;
-  if (groups < 1) groups = 1;
+  if (groups < 1)
+    groups = 1;
   glDispatchCompute(groups, 1, 1);
   checkGL("dispatchObjects:dispatch");
   glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -81,33 +82,37 @@ void PhysicsSystem::dispatchObjects(World *world, float dt) {
 
   // Advance trail heads on CPU to stay in sync with the shader
   if (objectCount > 0) {
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->SSBOobjA); // now the written buf
-  checkGL("dispatchObjects:bindForMap");
-  GPUBody *bodies = reinterpret_cast<GPUBody *>(
-      glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0,
-                       objectCount * sizeof(GPUBody), GL_MAP_READ_BIT));
-  checkGL("dispatchObjects:mapBufferRange");
-  if (bodies) {
-    for (int i = 0; i < objectCount; i++) {
-      if (bodies[i].alive > 0.5f) {
-        // Compute the same dynamic rate the shader used so heads stay in sync
-        float speed = glm::length(bodies[i].velocity);
-        if (speed < 0.1f) speed = 0.1f;
-        int rate = static_cast<int>(20.0f / speed);
-        if (rate < 1) rate = 1;
-        if (counter % rate == 0) {
-          world->trailHeads[i] = (world->trailHeads[i] + 1) % MAX_TRAIL;
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER,
+                 world->SSBOobjA); // now the written buf
+    checkGL("dispatchObjects:bindForMap");
+    GPUBody *bodies = reinterpret_cast<GPUBody *>(
+        glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0,
+                         objectCount * sizeof(GPUBody), GL_MAP_READ_BIT));
+    checkGL("dispatchObjects:mapBufferRange");
+    if (bodies) {
+      for (int i = 0; i < objectCount; i++) {
+        if (bodies[i].alive > 0.5f) {
+          // Compute the same dynamic rate the shader used so heads stay in sync
+          float speed = glm::length(bodies[i].velocity);
+          if (speed < 0.1f)
+            speed = 0.1f;
+          int rate = static_cast<int>(20.0f / speed);
+          if (rate < 1)
+            rate = 1;
+          if (counter % rate == 0) {
+            world->trailHeads[i] = (world->trailHeads[i] + 1) % MAX_TRAIL;
+          }
+          // Mirror position back to CPU for light-source / collision-response
+          // use
+          world->objects[i].transform.position = Vec3(
+              bodies[i].position.x, bodies[i].position.y, bodies[i].position.z);
         }
-        // Mirror position back to CPU for light-source / collision-response use
-        world->objects[i].transform.position =
-            Vec3(bodies[i].position.x, bodies[i].position.y, bodies[i].position.z);
       }
+      glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+      checkGL("dispatchObjects:unmap");
     }
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-    checkGL("dispatchObjects:unmap");
-  }
-  glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-  checkGL("dispatchObjects:unbind");
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    checkGL("dispatchObjects:unbind");
   } // objectCount > 0
 }
 
@@ -123,14 +128,13 @@ void PhysicsSystem::resolveCollisions(World *world, ObjectFactory *factory) {
     return;
   }
 
-  if (count > MAX_COLLISIONS) count = MAX_COLLISIONS;
+  if (count > MAX_COLLISIONS)
+    count = MAX_COLLISIONS;
 
   // Read the collision pairs (offset by 4 uints for std430 alignment)
   std::vector<CollisionPair> pairs(count);
-  glGetBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                     sizeof(uint32_t) * 4,
-                     count * sizeof(CollisionPair),
-                     pairs.data());
+  glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, sizeof(uint32_t) * 4,
+                     count * sizeof(CollisionPair), pairs.data());
 
   // Reset the count for the next frame
   const uint32_t zero = 0;
@@ -144,7 +148,7 @@ void PhysicsSystem::resolveCollisions(World *world, ObjectFactory *factory) {
     if (sIdx >= world->objects.size() || dIdx >= world->objects.size())
       continue;
 
-    Object &survivor  = world->objects[sIdx];
+    Object &survivor = world->objects[sIdx];
     Object &destroyed = world->objects[dIdx];
 
     if (!survivor.active || !destroyed.active)
@@ -158,14 +162,14 @@ void PhysicsSystem::resolveCollisions(World *world, ObjectFactory *factory) {
     // Read current GPU state for both objects
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->SSBOobjA);
     GPUBody gpuS, gpuD;
-    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                       sIdx * sizeof(GPUBody), sizeof(GPUBody), &gpuS);
-    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                       dIdx * sizeof(GPUBody), sizeof(GPUBody), &gpuD);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, sIdx * sizeof(GPUBody),
+                       sizeof(GPUBody), &gpuS);
+    glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, dIdx * sizeof(GPUBody),
+                       sizeof(GPUBody), &gpuD);
 
     // Merge physics
-    float newRadius = std::cbrt(std::pow(gpuS.radius, 3.0f) +
-                                std::pow(gpuD.radius, 3.0f));
+    float newRadius =
+        std::cbrt(std::pow(gpuS.radius, 3.0f) + std::pow(gpuD.radius, 3.0f));
     float totalMass = gpuS.mass + gpuD.mass;
     glm::vec3 finalVel =
         (gpuS.velocity * gpuS.mass + gpuD.velocity * gpuD.mass) / totalMass;
@@ -181,31 +185,31 @@ void PhysicsSystem::resolveCollisions(World *world, ObjectFactory *factory) {
     world->sprites[survivor.spriteID].color = finalColor;
 
     // Update CPU body mirror
-    bodyS.mass     = totalMass;
-    bodyS.radius   = newRadius;
+    bodyS.mass = totalMass;
+    bodyS.radius = newRadius;
     bodyS.velocity = Vec3(finalVel.x, finalVel.y, finalVel.z);
     survivor.transform.scale = Vec3(newRadius);
 
     // Write merged GPUBody back
-    gpuS.mass     = totalMass;
-    gpuS.radius   = newRadius;
+    gpuS.mass = totalMass;
+    gpuS.radius = newRadius;
     gpuS.velocity = finalVel;
-    gpuS.scale    = glm::vec3(newRadius);
-    glBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                    sIdx * sizeof(GPUBody), sizeof(GPUBody), &gpuS);
+    gpuS.scale = glm::vec3(newRadius);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, sIdx * sizeof(GPUBody),
+                    sizeof(GPUBody), &gpuS);
 
     // Mark destroyed object dead in SSBO
     gpuD.alive = 0.0f;
-    glBufferSubData(GL_SHADER_STORAGE_BUFFER,
-                    dIdx * sizeof(GPUBody), sizeof(GPUBody), &gpuD);
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, dIdx * sizeof(GPUBody),
+                    sizeof(GPUBody), &gpuD);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     // Spawn explosion on CPU (position from GPU read)
     Vec3 posS(gpuS.position.x, gpuS.position.y, gpuS.position.z);
     Vec3 posD(gpuD.position.x, gpuD.position.y, gpuD.position.z);
     Vec3 normal = (posS - posD).normalized();
-    factory->spawnExplosion(posS + normal * newRadius, normal,
-                            destroyed, EXPLOSION_PARTICLE_COUNT);
+    factory->spawnExplosion(posS + normal * newRadius, normal, destroyed,
+                            EXPLOSION_PARTICLE_COUNT);
 
     destroyed.destroyObj();
   }
@@ -213,7 +217,8 @@ void PhysicsSystem::resolveCollisions(World *world, ObjectFactory *factory) {
 
 void PhysicsSystem::dispatchParticles(World *world, float dt) {
   int particleCount = static_cast<int>(world->particles.size());
-  if (particleCount == 0) return;
+  if (particleCount == 0)
+    return;
 
   checkGL("dispatchParticles:enter");
   const Shader &shader = ResourceManager::GetShader("particlephy");
@@ -243,17 +248,21 @@ void PhysicsSystem::dispatchParticles(World *world, float dt) {
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, world->SSBOparticles);
   GPUParticle *gpuParts = reinterpret_cast<GPUParticle *>(
       glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0,
-                       particleCount * sizeof(GPUParticle),
-                       GL_MAP_READ_BIT));
+                       particleCount * sizeof(GPUParticle), GL_MAP_READ_BIT));
   if (gpuParts) {
     for (int i = 0; i < particleCount; i++) {
       Particle &p = world->particles[i];
       const GPUParticle &g = gpuParts[i];
       p.transform.position = Vec3(g.position.x, g.position.y, g.position.z);
-      p.transform.scale    = Vec3(g.scale.x, g.scale.y, g.scale.z);
-      p.velocity           = Vec3(g.velocity.x, g.velocity.y, g.velocity.z);
-      p.elapsedTime        = g.elapsedTime;
-      p.active             = (g.alive > 0.5f);
+      p.transform.scale = Vec3(g.scale.x, g.scale.y, g.scale.z);
+      p.velocity = Vec3(g.velocity.x, g.velocity.y, g.velocity.z);
+      p.elapsedTime = g.elapsedTime;
+
+      bool nowAlive = (g.alive > 0.5f);
+      if (p.active && !nowAlive) {
+        world->DeactivateParticle(static_cast<ParticleID>(i));
+      }
+      p.active = nowAlive;
     }
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
   }
