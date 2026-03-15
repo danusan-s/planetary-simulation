@@ -19,28 +19,28 @@ using ParticleID = uint32_t;
 constexpr uint32_t INVALID_ID = UINT32_MAX;
 constexpr int MAX_TRAIL = 512;
 constexpr int MAX_OBJECTS = 512;
-constexpr int MAX_PARTICLES = 1024;
-constexpr int MAX_COLLISIONS = 128;
+constexpr int MAX_PARTICLES = 5192;
+constexpr int MAX_COLLISIONS = 256;
 
 // GPU-side body layout (std430 — 48 bytes, no padding needed).
 // Indexed by ObjectID; both compute shaders and vertex shaders read this.
 struct GPUBody {
   glm::vec3 position; // 12
-  float     mass;     //  4
+  float mass;         //  4
   glm::vec3 velocity; // 12
-  float     radius;   //  4
+  float radius;       //  4
   glm::vec3 scale;    // 12
-  float     alive;    //  4  (1.0 = alive, 0.0 = dead)
+  float alive;        //  4  (1.0 = alive, 0.0 = dead)
 };
 
 // GPU-side particle layout (std430 — 48 bytes, no padding needed).
 struct GPUParticle {
-  glm::vec3 position;    // 12
-  float     lifetime;    //  4
-  glm::vec3 velocity;    // 12
-  float     elapsedTime; //  4
-  glm::vec3 scale;       // 12
-  float     alive;       //  4
+  glm::vec3 position; // 12
+  float lifetime;     //  4
+  glm::vec3 velocity; // 12
+  float elapsedTime;  //  4
+  glm::vec3 scale;    // 12
+  float alive;        //  4
 };
 
 // Written by the compute shader when a collision is detected.
@@ -127,15 +127,16 @@ struct Sprite {
   bool active;
 
   Sprite()
-      : textureID(""), shaderID(""), modelID(""),
-        color(Vec3(1.0f, 1.0f, 1.0f)), active(false) {
+      : textureID(""), shaderID(""), modelID(""), color(Vec3(1.0f, 1.0f, 1.0f)),
+        active(false) {
   }
 };
 
 struct Body {
   Vec3 velocity;
   float mass;
-  float radius; // Physics collision/gravity radius (independent of render scale)
+  float
+      radius; // Physics collision/gravity radius (independent of render scale)
   bool active;
 
   Body() : velocity(Vec3()), mass(1.0f), radius(1.0f), active(false) {

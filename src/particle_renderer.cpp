@@ -87,11 +87,10 @@ glm::mat4 ParticleRenderer::velocityStretchMatrix(glm::vec3 baseScale,
 }
 
 void ParticleRenderer::render(const glm::mat4 &viewProj, Camera &camera,
-                               const std::vector<Particle> &particles,
-                               const glm::vec3 &lightPos,
-                               const glm::vec3 &lightColor) {
+                              const std::vector<Particle> &particles,
+                              const glm::vec3 &lightPos,
+                              const glm::vec3 &lightColor) {
 
-  // --- 1. Build per-instance data on the CPU ---
   instanceData.clear();
 
   for (const auto &particle : particles) {
@@ -114,28 +113,23 @@ void ParticleRenderer::render(const glm::mat4 &viewProj, Camera &camera,
   if (instanceData.empty())
     return;
 
-  // --- 2. Lazy-init the VAO on first use ---
   const Model &model = ResourceManager::GetModel("debris");
   if (!vaoInitialized)
     setupVAO(model);
 
-  // --- 3. Upload instance data to GPU ---
   const size_t requiredBytes =
       instanceData.size() * sizeof(ParticleInstanceData);
 
   glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
   if (instanceData.size() > instanceBufferCapacity) {
-    // (Re-)allocate with some headroom so we don't reallocate every frame.
     instanceBufferCapacity = instanceData.size() * 2;
     glBufferData(GL_ARRAY_BUFFER,
                  instanceBufferCapacity * sizeof(ParticleInstanceData), nullptr,
                  GL_DYNAMIC_DRAW);
   }
-  // Sub-upload only the used portion.
   glBufferSubData(GL_ARRAY_BUFFER, 0, requiredBytes, instanceData.data());
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  // --- 4. Set shared uniforms & bind state, then issue ONE draw call ---
   const Shader &shader = ResourceManager::GetShader("particle");
   const Texture2D &texture = ResourceManager::GetTexture("solid");
 
