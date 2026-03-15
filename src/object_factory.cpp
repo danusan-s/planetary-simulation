@@ -51,8 +51,9 @@ void ObjectFactory::generateRandomPlanet() {
                 randomFloat(-this->velocityRange, this->velocityRange));
 
   // Bright colors
-  Vec3 color(randomFloat(0.5f, 1.0f), randomFloat(0.5f, 1.0f),
-             randomFloat(0.5f, 1.0f));
+  Vec3 color(randomFloat(this->colorMin, this->colorMax),
+             randomFloat(this->colorMin, this->colorMax),
+             randomFloat(this->colorMin, this->colorMax));
 
   spawnPlanet(position, radius, mass, velocity, color, "solid");
 }

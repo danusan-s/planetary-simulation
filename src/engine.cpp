@@ -146,6 +146,12 @@ void Engine::startScene() {
 
   switch (menuConfig.mode) {
     case SceneMode::Random:
+      // Apply menu config to object factory
+      this->objectFactory->positionRange = menuConfig.positionRange;
+      this->objectFactory->minPlanetMass = menuConfig.minMass;
+      this->objectFactory->maxPlanetMass = menuConfig.maxMass;
+      this->objectFactory->colorMin = menuConfig.colorMin;
+      this->objectFactory->colorMax = menuConfig.colorMax;
       this->objectFactory->generateRandomSystem(menuConfig.planetCount);
       break;
     case SceneMode::Preset:
@@ -319,6 +325,24 @@ void Engine::renderMenu() {
   // Mode-specific options
   if (menuConfig.mode == SceneMode::Random) {
     ImGui::DragInt("Planet Count", &menuConfig.planetCount, 1.0f, 1, 500);
+
+    ImGui::Spacing();
+    ImGui::DragFloat("Position Range", &menuConfig.positionRange, 1.0f, 10.0f,
+                     2000.0f, "%.0f");
+
+    ImGui::Spacing();
+    ImGui::Text("Mass Range:");
+    ImGui::DragFloat("Min Mass", &menuConfig.minMass, 0.1f, 0.1f,
+                     menuConfig.maxMass, "%.1f");
+    ImGui::DragFloat("Max Mass", &menuConfig.maxMass, 1.0f, menuConfig.minMass,
+                     100000.0f, "%.1f");
+
+    ImGui::Spacing();
+    ImGui::Text("Color Range:");
+    ImGui::DragFloat("Color Min", &menuConfig.colorMin, 0.01f, 0.0f,
+                     menuConfig.colorMax, "%.2f");
+    ImGui::DragFloat("Color Max", &menuConfig.colorMax, 0.01f,
+                     menuConfig.colorMin, 1.0f, "%.2f");
   } else {
     if (presetFiles.empty()) {
       ImGui::TextWrapped("No preset files found in presets/ directory.");
@@ -374,12 +398,16 @@ void Engine::renderHUD() {
 
   // -- Simulation speed --
   ImGui::InputFloat("Time Scale", &timeScale, 0.01f, 0.1f, "%.2f");
-  if (timeScale < 0.0f) timeScale = 0.0f;
-  if (timeScale > 5.0f) timeScale = 5.0f;
+  if (timeScale < 0.0f)
+    timeScale = 0.0f;
+  if (timeScale > 5.0f)
+    timeScale = 5.0f;
 
   // -- Camera speed --
-  ImGui::InputFloat("Camera Speed", &world->camera.maxSpeed, 10.0f, 50.0f, "%.0f");
-  if (world->camera.maxSpeed < 1.0f) world->camera.maxSpeed = 1.0f;
+  ImGui::InputFloat("Camera Speed", &world->camera.maxSpeed, 10.0f, 50.0f,
+                    "%.0f");
+  if (world->camera.maxSpeed < 1.0f)
+    world->camera.maxSpeed = 1.0f;
 
   ImGui::Separator();
 

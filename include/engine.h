@@ -35,6 +35,12 @@ private:
     SceneMode mode = SceneMode::Random;
     int planetCount = 100;
     int selectedPreset = 0;
+    // Random generation params
+    float positionRange = 200.0f;
+    float minMass = 1.0f;
+    float maxMass = 1000.0f;
+    float colorMin = 0.5f;
+    float colorMax = 1.0f;
   };
 
   static constexpr float LOAD_DELAY = 3.0f;
