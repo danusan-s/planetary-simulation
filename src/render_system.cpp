@@ -30,7 +30,7 @@ void RenderSystem::renderSkybox(World *world) {
 }
 
 void RenderSystem::getSunLight(World *world, Vec3 &outPos, Vec3 &outColor) {
-  outPos = Vec3(100.0f, 100.0f, 100.0f);
+  outPos = Vec3(1000.0f, 1000.0f, 1000.0f);
   outColor = Vec3(1.0f);
   if (world->sunID != INVALID_ID) {
     const Object &sun = world->objects[world->sunID];
@@ -81,8 +81,7 @@ void RenderSystem::renderParticles(World *world) {
   Vec3 lightPos, lightColor;
   getSunLight(world, lightPos, lightColor);
 
-  this->particleRenderer->render(this->viewProj, world->camera,
-                                 world->particles,
-                                 static_cast<glm::vec3>(lightPos),
-                                 static_cast<glm::vec3>(lightColor));
+  this->particleRenderer->render(
+      this->viewProj, world->camera, world->particles,
+      static_cast<glm::vec3>(lightPos), static_cast<glm::vec3>(lightColor));
 }

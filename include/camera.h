@@ -23,7 +23,7 @@ public:
   static constexpr float DEFAULT_ZOOM = 45.0f;
   static constexpr float DEFAULT_ASPECT_RATIO = 16.0f / 9.0f;
   static constexpr float DEFAULT_NEAR_PLANE = 0.1f;
-  static constexpr float DEFAULT_FAR_PLANE = 10000.0f;
+  static constexpr float DEFAULT_FAR_PLANE = 100000.0f;
 
   // camera attributes
   glm::vec3 position;

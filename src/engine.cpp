@@ -400,8 +400,8 @@ void Engine::renderHUD() {
   ImGui::InputFloat("Time Scale", &timeScale, 0.01f, 0.1f, "%.2f");
   if (timeScale < 0.0f)
     timeScale = 0.0f;
-  if (timeScale > 5.0f)
-    timeScale = 5.0f;
+  if (timeScale > 100.0f)
+    timeScale = 100.0f;
 
   // -- Camera speed --
   ImGui::InputFloat("Camera Speed", &world->camera.maxSpeed, 10.0f, 50.0f,

@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
   float accumulatedTime = 0.0f;
 
   //  240 fps simulation
-  const float timeStep = 1 / 240.0f;
+  const float timeStep = 1 / 60.0f;
 
   while (!glfwWindowShouldClose(window)) {
     // calculate delta time

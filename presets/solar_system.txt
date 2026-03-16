@@ -3,63 +3,63 @@ G 0.00174
 
 sun
 pos 0 0 0
-radius 40.537
+radius 163.5
 mass 332943
 vel 0 0 0
 color 1 1 0.7
 
 mercury
-pos 57.91 0 0
-radius 0.142
+pos 579.1 0 0
+radius 0.575
 mass 0.055
-vel 0 0 3.163
+vel 0 0 1.001
 color 1 1 1
 
 venus
-pos 108.2 0 0
-radius 0.353
+pos 1082.0 0 0
+radius 1.424
 mass 0.815
-vel 0 0 2.314
+vel 0 0 0.732
 color 1 1 1
 
 earth
-pos 149.6 0 0
-radius 0.372
+pos 1496.0 0 0
+radius 1.5
 mass 1.000
-vel 0 0 1.968
+vel 0 0 0.622
 color 1 1 1
 
 mars
-pos 227.9 0 0
-radius 0.198
+pos 2279.0 0 0
+radius 0.798
 mass 0.107
-vel 0 0 1.594
+vel 0 0 0.504
 color 1 1 1
 
 jupiter
-pos 778.6 0 0
-radius 4.169
+pos 7786.0 0 0
+radius 16.815
 mass 308
-vel 0 0 0.863
+vel 0 0 0.273
 color 1 1 1
 
 saturn
-pos 1433.0 0 0
-radius 3.514
+pos 14330.0 0 0
+radius 14.175
 mass 95
-vel 0 0 0.636
+vel 0 0 0.201
 color 1 1 1
 
 uranus
-pos 2877.0 0 0
-radius 1.491
+pos 28770.0 0 0
+radius 6.015
 mass 14.5
-vel 0 0 0.449
+vel 0 0 0.142
 color 1 1 1
 
 neptune
-pos 4503.0 0 0
-radius 1.443
+pos 45030.0 0 0
+radius 5.82
 mass 17.2
-vel 0 0 0.359
+vel 0 0 0.114
 color 1 1 1
